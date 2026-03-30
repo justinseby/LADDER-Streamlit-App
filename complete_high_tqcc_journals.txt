@@ -1,0 +1,405 @@
+Complete List of Journals with TQCC ≥ 10.0
+================================================================================
+Total journals found: 400
+================================================================================
+
+  #1 | CA-A Cancer Journal for Clinicians                           | TQCC: 503.1
+  #2 | Nature Reviews Drug Discovery                                | TQCC: 122.7
+  #3 | Lancet                                                       | TQCC: 98.4
+  #4 | New England Journal of Medicine                              | TQCC: 96.2
+  #5 | Nature Reviews Molecular Cell Biology                        | TQCC: 81.3
+  #6 | Nature Reviews Clinical Oncology                             | TQCC: 81.1
+  #7 | Nature Reviews Materials                                     | TQCC: 79.8
+  #8 | Nature Reviews Disease Primers                               | TQCC: 76.9
+  #9 | Nature Reviews Microbiology                                  | TQCC: 69.2
+ #10 | JAMA-Journal of the American Medical Association             | TQCC: 63.1
+ #11 | World Psychiatry                                             | TQCC: 60.5
+ #12 | Nature Medicine                                              | TQCC: 58.7
+ #13 | Annals of Oncology                                           | TQCC: 56.7
+ #14 | Chemical Reviews                                             | TQCC: 51.4
+ #15 | Nature                                                       | TQCC: 50.5
+ #16 | Nature Energy                                                | TQCC: 49.7
+ #17 | Cancer Cell                                                  | TQCC: 48.8
+ #18 | Lancet Neurology                                             | TQCC: 46.5
+ #19 | Reviews of Modern Physics                                    | TQCC: 45.9
+ #20 | Nature Reviews Gastroenterology & Hepatology                 | TQCC: 45.9
+ #21 | Nature Reviews Physics                                       | TQCC: 44.8
+ #22 | Science                                                      | TQCC: 44.7
+ #23 | Lancet Diabetes & Endocrinology                              | TQCC: 44.0
+ #24 | Nature Catalysis                                             | TQCC: 42.8
+ #25 | Journal of Clinical Oncology                                 | TQCC: 42.1
+ #26 | Nature Reviews Cardiology                                    | TQCC: 41.7
+ #27 | Lancet Oncology                                              | TQCC: 41.6
+ #28 | Chemical Society Reviews                                     | TQCC: 40.4
+ #29 | Nature Reviews Genetics                                      | TQCC: 39.1
+ #30 | Lancet Respiratory Medicine                                  | TQCC: 38.7
+ #31 | Nature Reviews Chemistry                                     | TQCC: 38.1
+ #32 | Nature Nanotechnology                                        | TQCC: 38.1
+ #33 | European Heart Journal                                       | TQCC: 37.6
+ #34 | Nature Materials                                             | TQCC: 37.2
+ #35 | Lancet Infectious Diseases                                   | TQCC: 36.4
+ #36 | Nature Methods                                               | TQCC: 36.1
+ #37 | Circulation                                                  | TQCC: 35.5
+ #38 | IEEE Communications Surveys and Tutorials                    | TQCC: 34.4
+ #39 | Nature Electronics                                           | TQCC: 33.7
+ #40 | Progress in Materials Science                                | TQCC: 33.6
+ #41 | Nature Biotechnology                                         | TQCC: 33.1
+ #42 | Energy & Environmental Science                               | TQCC: 32.4
+ #43 | Nature Photonics                                             | TQCC: 32.3
+ #44 | Progress in Energy and Combustion Science                    | TQCC: 32.0
+ #45 | Nature Genetics                                              | TQCC: 31.7
+ #46 | Nano-Micro Letters                                           | TQCC: 31.6
+ #47 | Materials Science & Engineering R-Reports                    | TQCC: 31.6
+ #48 | Nature Reviews Endocrinology                                 | TQCC: 31.0
+ #49 | Lancet Gastroenterology & Hepatology                         | TQCC: 30.9
+ #50 | Physiological Reviews                                        | TQCC: 29.9
+ #51 | Cancer Discovery                                             | TQCC: 29.7
+ #52 | Nature Climate Change                                        | TQCC: 29.6
+ #53 | Journal of Hematology & Oncology                             | TQCC: 29.5
+ #54 | Nature Reviews Rheumatology                                  | TQCC: 29.4
+ #55 | Nature Reviews Nephrology                                    | TQCC: 28.6
+ #56 | Electrochemical Energy Reviews                               | TQCC: 28.4
+ #57 | Annual Review of Pathology-Mechanisms of Disease             | TQCC: 28.4
+ #58 | Nature Reviews Neurology                                     | TQCC: 28.2
+ #59 | Cell Research                                                | TQCC: 28.1
+ #60 | Nature Immunology                                            | TQCC: 27.7
+ #61 | Molecular Cancer                                             | TQCC: 27.7
+ #62 | Cell Metabolism                                              | TQCC: 27.7
+ #63 | Advanced Materials                                           | TQCC: 27.4
+ #64 | Intensive Care Medicine                                      | TQCC: 27.1
+ #65 | Annual Review of Immunology                                  | TQCC: 26.9
+ #66 | Journal of Hepatology                                        | TQCC: 26.8
+ #67 | Nature Biomedical Engineering                                | TQCC: 26.8
+ #68 | Science Robotics                                             | TQCC: 26.1
+ #69 | Progress in Polymer Science                                  | TQCC: 26.0
+ #70 | Gastroenterology                                             | TQCC: 25.7
+ #71 | Nature Sustainability                                        | TQCC: 25.7
+ #72 | Immunity                                                     | TQCC: 25.5
+ #73 | Lancet Public Health                                         | TQCC: 25.4
+ #74 | MMWR-Morbidity and Mortality Weekly Report                   | TQCC: 25.4
+ #75 | Annual Review of Fluid Mechanics                             | TQCC: 25.4
+ #76 | European Urology                                             | TQCC: 25.3
+ #77 | Reviews of Geophysics                                        | TQCC: 25.2
+ #78 | Advances in Optics and Photonics                             | TQCC: 25.2
+ #79 | JAMA Pediatrics                                              | TQCC: 24.7
+ #80 | Fungal Diversity                                             | TQCC: 24.5
+ #81 | Advanced Energy Materials                                    | TQCC: 24.4
+ #82 | Lancet Planetary Health                                      | TQCC: 24.1
+ #83 | Physics Reports-Review Section of Physics Letters            | TQCC: 23.9
+ #84 | Lancet Digital Health                                        | TQCC: 23.8
+ #85 | ACM Computing Surveys                                        | TQCC: 23.8
+ #86 | Annual Review of Psychology                                  | TQCC: 23.6
+ #87 | Nature Cancer                                                | TQCC: 23.5
+ #88 | Advanced Composites and Hybrid Materials                     | TQCC: 23.2
+ #89 | Proceedings of the IEEE                                      | TQCC: 23.2
+ #90 | InfoMat                                                      | TQCC: 22.7
+ #91 | JAMA Psychiatry                                              | TQCC: 22.5
+ #92 | JAMA Oncology                                                | TQCC: 22.5
+ #93 | JAMA Internal Medicine                                       | TQCC: 22.5
+ #94 | Endocrine Reviews                                            | TQCC: 22.0
+ #95 | Cellular & Molecular Immunology                              | TQCC: 21.8
+ #96 | Journal of the American College of Cardiology                | TQCC: 21.7
+ #97 | Annual Review of Public Health                               | TQCC: 21.4
+ #98 | Nature Human Behaviour                                       | TQCC: 21.4
+ #99 | Annual Review Plant Biology                                  | TQCC: 21.3
+#100 | Nature Neuroscience                                          | TQCC: 21.2
+#101 | Materials Today                                              | TQCC: 21.1
+#102 | Journal of Thoracic Oncology                                 | TQCC: 21.0
+#103 | IEEE Transactions on Pattern Analysis and Machine Intelligence | TQCC: 20.8
+#104 | Advanced Photonics                                           | TQCC: 20.6
+#105 | Cell Host & Microbe                                          | TQCC: 20.6
+#106 | Nature Microbiology                                          | TQCC: 20.5
+#107 | JAMA Neurology                                               | TQCC: 20.4
+#108 | Coordination Chemistry Reviews                               | TQCC: 20.3
+#109 | Annals of the Rheumatic Diseases                             | TQCC: 20.3
+#110 | Applied Catalysis B-Environmental                            | TQCC: 20.2
+#111 | International Journal of Information Management              | TQCC: 20.1
+#112 | Cancer Communications                                        | TQCC: 20.1
+#113 | Lancet Child & Adolescent Health                             | TQCC: 19.9
+#114 | Lancet Global Health                                         | TQCC: 19.9
+#115 | Cell Stem Cell                                               | TQCC: 19.8
+#116 | Annals of Internal Medicine                                  | TQCC: 19.6
+#117 | Carbon Energy                                                | TQCC: 19.5
+#118 | American Journal of Respiratory and Critical Care Medicine   | TQCC: 19.3
+#119 | Academy of Management Review                                 | TQCC: 19.3
+#120 | Pharmacological Reviews                                      | TQCC: 19.3
+#121 | ACS Energy Letters                                           | TQCC: 19.3
+#122 | Nature Chemistry                                             | TQCC: 19.2
+#123 | Reports on Progress in Physics                               | TQCC: 19.0
+#124 | Clinical Microbiology Reviews                                | TQCC: 19.0
+#125 | Energy Storage Materials                                     | TQCC: 18.9
+#126 | Nature Metabolism                                            | TQCC: 18.9
+#127 | Science Bulletin                                             | TQCC: 18.8
+#128 | Nature Machine Intelligence                                  | TQCC: 18.8
+#129 | Journal of Advanced Ceramics                                 | TQCC: 18.6
+#130 | Progress in Retinal and Eye Research                         | TQCC: 18.6
+#131 | Advanced Functional Materials                                | TQCC: 18.5
+#132 | Bioactive Materials                                          | TQCC: 18.0
+#133 | Annual Review of Clinical Psychology                         | TQCC: 17.8
+#134 | Nature Physics                                               | TQCC: 17.6
+#135 | Science Immunology                                           | TQCC: 17.6
+#136 | Periodontology 2000                                          | TQCC: 17.5
+#137 | Psychological Bulletin                                       | TQCC: 17.3
+#138 | Trends in Plant Science                                      | TQCC: 17.3
+#139 | Nature Cell Biology                                          | TQCC: 17.3
+#140 | Computational Visual Media                                   | TQCC: 17.3
+#141 | Advanced Fiber Materials                                     | TQCC: 17.2
+#142 | IEEE Reviews in Biomedical Engineering                       | TQCC: 17.2
+#143 | Molecular Plant                                              | TQCC: 17.1
+#144 | American Journal of Bioethics                                | TQCC: 17.0
+#145 | European Journal of Heart Failure                            | TQCC: 16.9
+#146 | Nano Energy                                                  | TQCC: 16.8
+#147 | International Materials Reviews                              | TQCC: 16.8
+#148 | Wiley Interdisciplinary Reviews-Computational Molecular Science | TQCC: 16.8
+#149 | Trends in Ecology & Evolution                                | TQCC: 16.7
+#150 | Trends in Cognitive Sciences                                 | TQCC: 16.7
+#151 | Behavioral and Brain Sciences                                | TQCC: 16.6
+#152 | Nucleic Acids Research                                       | TQCC: 16.6
+#153 | European Respiratory Journal                                 | TQCC: 16.6
+#154 | Circulation Research                                         | TQCC: 16.5
+#155 | Neuro-Oncology                                               | TQCC: 16.4
+#156 | Accounts of Chemical Research                                | TQCC: 16.4
+#157 | Renewable & Sustainable Energy Reviews                       | TQCC: 16.3
+#158 | National Science Review                                      | TQCC: 16.3
+#159 | Psychotherapy and Psychosomatics                             | TQCC: 16.3
+#160 | IEEE Geoscience and Remote Sensing Magazine                  | TQCC: 16.2
+#161 | Angewandte Chemie-International Edition                      | TQCC: 16.1
+#162 | International Journal of Extreme Manufacturing               | TQCC: 16.1
+#163 | Advances in Colloid and Interface Science                    | TQCC: 15.9
+#164 | Drug Resistance Updates                                      | TQCC: 15.8
+#165 | Journal of Magnesium and Alloys                              | TQCC: 15.8
+#166 | Science Translational Medicine                               | TQCC: 15.8
+#167 | ACS Nano                                                     | TQCC: 15.8
+#168 | Annual Review of Physiology                                  | TQCC: 15.7
+#169 | Nature Geoscience                                            | TQCC: 15.7
+#170 | JAMA Surgery                                                 | TQCC: 15.7
+#171 | Advances in Methods and Practices in Psychological Science   | TQCC: 15.6
+#172 | Journal of Extracellular Vesicles                            | TQCC: 15.5
+#173 | Lancet Haematology                                           | TQCC: 15.4
+#174 | Opto-Electronic Advances                                     | TQCC: 15.3
+#175 | IEEE-CAA Journal of Automatica Sinica                        | TQCC: 15.3
+#176 | Advanced Drug Delivery Reviews                               | TQCC: 15.2
+#177 | Trends in Food Science & Technology                          | TQCC: 15.1
+#178 | Annual Review of Medicine                                    | TQCC: 15.1
+#179 | American Journal of Psychiatry                               | TQCC: 15.1
+#180 | Annual Review of Entomology                                  | TQCC: 15.0
+#181 | Lancet Rheumatology                                          | TQCC: 15.0
+#182 | Environmental Chemistry Letters                              | TQCC: 15.0
+#183 | eTransportation                                              | TQCC: 15.0
+#184 | Molecular Neurodegeneration                                  | TQCC: 14.9
+#185 | Journal of the National Comprehensive Cancer Network         | TQCC: 14.8
+#186 | Diabetes Care                                                | TQCC: 14.8
+#187 | Human Reproduction Update                                    | TQCC: 14.8
+#188 | Kidney International                                         | TQCC: 14.8
+#189 | JAMA Cardiology                                              | TQCC: 14.8
+#190 | Acta Pharmaceutica Sinica B                                  | TQCC: 14.7
+#191 | Neuron                                                       | TQCC: 14.7
+#192 | Nature Communications                                        | TQCC: 14.7
+#193 | Information Fusion                                           | TQCC: 14.7
+#194 | Trends in Neurosciences                                      | TQCC: 14.6
+#195 | Autophagy                                                    | TQCC: 14.6
+#196 | Molecular Cell                                               | TQCC: 14.5
+#197 | Progress in Particle and Nuclear Physics                     | TQCC: 14.5
+#198 | Journal of the American Chemical Society                     | TQCC: 14.4
+#199 | Journal of Infection                                         | TQCC: 14.3
+#200 | Educational Psychologist                                     | TQCC: 14.3
+#201 | Annual Review of Organizational Psychology and Organizational Behavior | TQCC: 14.3
+#202 | Academy of Management Annals                                 | TQCC: 14.3
+#203 | Annual Review of Condensed Matter Physics                    | TQCC: 14.3
+#204 | Advanced Science                                             | TQCC: 14.3
+#205 | Annual Review of Marine Science                              | TQCC: 14.3
+#206 | Trends in Biotechnology                                      | TQCC: 14.3
+#207 | Progress in Lipid Research                                   | TQCC: 14.0
+#208 | Trends in Microbiology                                       | TQCC: 14.0
+#209 | International Journal of Machine Tools & Manufacture         | TQCC: 14.0
+#210 | IEEE Transactions on Intelligent Vehicles                    | TQCC: 14.0
+#211 | Clinical and Molecular Hepatology                            | TQCC: 14.0
+#212 | Trends in Chemistry                                          | TQCC: 14.0
+#213 | Journal of Energy Chemistry                                  | TQCC: 14.0
+#214 | Trends in Pharmacological Sciences                           | TQCC: 13.9
+#215 | Nature Ecology & Evolution                                   | TQCC: 13.9
+#216 | Microbiome                                                   | TQCC: 13.8
+#217 | IEEE Journal on Selected Areas in Communications             | TQCC: 13.8
+#218 | Physics of Life Reviews                                      | TQCC: 13.7
+#219 | Clinical Psychology Review                                   | TQCC: 13.7
+#220 | Cell Death and Differentiation                               | TQCC: 13.7
+#221 | Trends in Genetics                                           | TQCC: 13.6
+#222 | Protein & Cell                                               | TQCC: 13.6
+#223 | Energy Economics                                             | TQCC: 13.6
+#224 | Nano Convergence                                             | TQCC: 13.4
+#225 | Journal of Clinical Investigation                            | TQCC: 13.3
+#226 | Computer Science Review                                      | TQCC: 13.3
+#227 | Chemical Engineering Journal                                 | TQCC: 13.3
+#228 | Nano Today                                                   | TQCC: 13.2
+#229 | Nature Protocols                                             | TQCC: 13.1
+#230 | Trends in Immunology                                         | TQCC: 13.1
+#231 | Biochar                                                      | TQCC: 13.1
+#232 | Ophthalmology                                                | TQCC: 13.1
+#233 | Trends in Cell Biology                                       | TQCC: 13.0
+#234 | Journal of Ocean Engineering and Science                     | TQCC: 13.0
+#235 | Energy & Environmental Materials                             | TQCC: 13.0
+#236 | Cell Discovery                                               | TQCC: 13.0
+#237 | Alzheimers & Dementia                                        | TQCC: 13.0
+#238 | Hepatology                                                   | TQCC: 12.9
+#239 | Blood Cancer Journal                                         | TQCC: 12.9
+#240 | Nature Astronomy                                             | TQCC: 12.9
+#241 | Nature Chemical Biology                                      | TQCC: 12.9
+#242 | Technological Forecasting and Social Change                  | TQCC: 12.9
+#243 | Lancet HIV                                                   | TQCC: 12.8
+#244 | Trends in Molecular Medicine                                 | TQCC: 12.8
+#245 | Journal of the American Academy of Dermatology               | TQCC: 12.8
+#246 | JACC-Cardiovascular Imaging                                  | TQCC: 12.8
+#247 | Journal of Photochemistry and Photobiology C-Photochemistry Reviews | TQCC: 12.8
+#248 | Biomaterials                                                 | TQCC: 12.8
+#249 | Leukemia                                                     | TQCC: 12.8
+#250 | Annual Review of Biomedical Engineering                      | TQCC: 12.8
+#251 | Composites Part B-Engineering                                | TQCC: 12.7
+#252 | ACS Central Science                                          | TQCC: 12.7
+#253 | Journal of Experimental Medicine                             | TQCC: 12.6
+#254 | Allergy                                                      | TQCC: 12.6
+#255 | Cancer Research                                              | TQCC: 12.5
+#256 | International Journal of Surgery                             | TQCC: 12.5
+#257 | Nature Structural & Molecular Biology                        | TQCC: 12.5
+#258 | Business Strategy and the Environment                        | TQCC: 12.5
+#259 | Ageing Research Reviews                                      | TQCC: 12.5
+#260 | Theranostics                                                 | TQCC: 12.4
+#261 | npj Digital Medicine                                         | TQCC: 12.4
+#262 | npj Flexible Electronics                                     | TQCC: 12.3
+#263 | American Psychologist                                        | TQCC: 12.3
+#264 | Applied Mechanics Reviews                                    | TQCC: 12.2
+#265 | Materials Horizons                                           | TQCC: 12.2
+#266 | Gut Microbes                                                 | TQCC: 12.2
+#267 | Journal of Manufacturing Systems                             | TQCC: 12.2
+#268 | Current Opinion in Solid State & Materials Science           | TQCC: 12.2
+#269 | Journal of Hazardous Materials                               | TQCC: 12.2
+#270 | Seminars in Cancer Biology                                   | TQCC: 12.1
+#271 | Molecular Therapy                                            | TQCC: 12.1
+#272 | Biotechnology Advances                                       | TQCC: 12.1
+#273 | Nature Reviews Urology                                       | TQCC: 12.1
+#274 | Radiology                                                    | TQCC: 12.1
+#275 | Annual Review of Neuroscience                                | TQCC: 12.1
+#276 | Annual Review of Biochemistry                                | TQCC: 12.1
+#277 | Pharmacology & Therapeutics                                  | TQCC: 12.0
+#278 | Comprehensive Reviews in Food Science and Food Safety        | TQCC: 12.0
+#279 | JACC: Cardiooncology                                         | TQCC: 12.0
+#280 | Journal of Hospitality Marketing & Management                | TQCC: 11.9
+#281 | Applied Physics Reviews                                      | TQCC: 11.9
+#282 | TRAC-Trends in Analytical Chemistry                          | TQCC: 11.8
+#283 | GigaScience                                                  | TQCC: 11.8
+#284 | IEEE Transactions on Industrial Informatics                  | TQCC: 11.7
+#285 | International Journal of Mining Science and Technology       | TQCC: 11.7
+#286 | IEEE Transactions on Evolutionary Computation                | TQCC: 11.7
+#287 | JACC-Cardiovascular Interventions                            | TQCC: 11.7
+#288 | Science Advances                                             | TQCC: 11.7
+#289 | Clinical Gastroenterology and Hepatology                     | TQCC: 11.6
+#290 | Liver Cancer                                                 | TQCC: 11.6
+#291 | British Journal of Sports Medicine                           | TQCC: 11.6
+#292 | Trends in Biochemical Sciences                               | TQCC: 11.6
+#293 | Physical Review X                                            | TQCC: 11.6
+#294 | International Journal of Computer Vision                     | TQCC: 11.6
+#295 | Journal of Marketing                                         | TQCC: 11.5
+#296 | Progress in Aerospace Sciences                               | TQCC: 11.5
+#297 | Endoscopy                                                    | TQCC: 11.5
+#298 | Genomics Proteomics & Bioinformatics                         | TQCC: 11.5
+#299 | JAMA Dermatology                                             | TQCC: 11.5
+#300 | Industrial and Organizational Psychology-Perspectives on Science and Practice | TQCC: 11.5
+#301 | Journal of Economic Literature                               | TQCC: 11.5
+#302 | Journal of Allergy and Clinical Immunology                   | TQCC: 11.4
+#303 | Journal of Advanced Research                                 | TQCC: 11.4
+#304 | Water Research                                               | TQCC: 11.4
+#305 | Critical Reviews in Environmental Science and Technology     | TQCC: 11.4
+#306 | Journal of Experimental & Clinical Cancer Research           | TQCC: 11.4
+#307 | Trends in Endocrinology and Metabolism                       | TQCC: 11.4
+#308 | Annual Review of Cell and Developmental Biology              | TQCC: 11.4
+#309 | Arthritis & Rheumatology                                     | TQCC: 11.4
+#310 | Endocrine Pathology                                          | TQCC: 11.3
+#311 | Annual Review of Earth and Planetary Sciences                | TQCC: 11.3
+#312 | ACS Catalysis                                                | TQCC: 11.3
+#313 | Annual Review of Pharmacology and Toxicology                 | TQCC: 11.2
+#314 | Sleep Medicine Reviews                                       | TQCC: 11.2
+#315 | Annual Review of Ecology Evolution and Systematics           | TQCC: 11.2
+#316 | Journal of Business Logistics                                | TQCC: 11.2
+#317 | Journal of Materials Science & Technology                    | TQCC: 11.2
+#318 | Resources Conservation and Recycling                         | TQCC: 11.2
+#319 | Technovation                                                 | TQCC: 11.1
+#320 | Polymer Reviews                                              | TQCC: 11.1
+#321 | Trends in Environmental Analytical Chemistry                 | TQCC: 11.1
+#322 | Quarterly Journal of Economics                               | TQCC: 11.1
+#323 | Communications of the ACM                                    | TQCC: 11.1
+#324 | Remote Sensing of Environment                                | TQCC: 11.1
+#325 | Biological Reviews                                           | TQCC: 11.0
+#326 | Molecular Biology and Evolution                              | TQCC: 11.0
+#327 | British Journal of Dermatology                               | TQCC: 11.0
+#328 | Journal of Retailing and Consumer Services                   | TQCC: 11.0
+#329 | Food Hydrocolloids                                           | TQCC: 11.0
+#330 | Clinical Microbiology and Infection                          | TQCC: 10.9
+#331 | Medicinal Research Reviews                                   | TQCC: 10.9
+#332 | Tourism Management                                           | TQCC: 10.9
+#333 | Sustainable Production and Consumption                       | TQCC: 10.9
+#334 | IEEE Wireless Communications                                 | TQCC: 10.9
+#335 | Cement and Concrete Research                                 | TQCC: 10.9
+#336 | Earth-Science Reviews                                        | TQCC: 10.8
+#337 | Global Change Biology                                        | TQCC: 10.8
+#338 | International Journal of Oral Science                        | TQCC: 10.8
+#339 | Acta Physico-Chimica Sinica                                  | TQCC: 10.8
+#340 | Metabolism-Clinical and Experimental                         | TQCC: 10.8
+#341 | SIAM Review                                                  | TQCC: 10.8
+#342 | Environmental Science & Technology                           | TQCC: 10.8
+#343 | IEEE Transactions on Image Processing                        | TQCC: 10.8
+#344 | Cement & Concrete Composites                                 | TQCC: 10.8
+#345 | Translational Neurodegeneration                              | TQCC: 10.8
+#346 | ISME Journal                                                 | TQCC: 10.8
+#347 | Biosensors & Bioelectronics                                  | TQCC: 10.7
+#348 | Carbohydrate Polymers                                        | TQCC: 10.7
+#349 | Medical Image Analysis                                       | TQCC: 10.7
+#350 | Asian Journal of Pharmaceutical Sciences                     | TQCC: 10.7
+#351 | Small Methods                                                | TQCC: 10.7
+#352 | Redox Biology                                                | TQCC: 10.7
+#353 | Journal of Materials Chemistry A                             | TQCC: 10.7
+#354 | Developmental Cell                                           | TQCC: 10.7
+#355 | IEEE Transactions on Fuzzy Systems                           | TQCC: 10.7
+#356 | Artificial Intelligence Review                               | TQCC: 10.7
+#357 | Annual Review of Food Science and Technology                 | TQCC: 10.6
+#358 | Journal of Nanobiotechnology                                 | TQCC: 10.6
+#359 | ISPRS Journal of Photogrammetry and Remote Sensing           | TQCC: 10.6
+#360 | Journal of Controlled Release                                | TQCC: 10.5
+#361 | Perspectives on Psychological Science                        | TQCC: 10.5
+#362 | Journal of Business Research                                 | TQCC: 10.5
+#363 | Carbon                                                       | TQCC: 10.5
+#364 | JAMA Network Open                                            | TQCC: 10.5
+#365 | American Economic Review                                     | TQCC: 10.5
+#366 | Sustainable Cities and Society                               | TQCC: 10.5
+#367 | Annals of Tourism Research                                   | TQCC: 10.4
+#368 | Genome Medicine                                              | TQCC: 10.4
+#369 | Annual Review of Biophysics                                  | TQCC: 10.4
+#370 | Pulmonology                                                  | TQCC: 10.4
+#371 | Journal of Financial Economics                               | TQCC: 10.4
+#372 | Science China-Chemistry                                      | TQCC: 10.4
+#373 | npj Clean Water                                              | TQCC: 10.4
+#374 | JACC-Heart Failure                                           | TQCC: 10.3
+#375 | Environment International                                    | TQCC: 10.3
+#376 | IEEE Computational Intelligence Magazine                     | TQCC: 10.3
+#377 | Journal for Immunotherapy of Cancer                          | TQCC: 10.3
+#378 | Journal of the American Society of Nephrology                | TQCC: 10.3
+#379 | Additive Manufacturing                                       | TQCC: 10.3
+#380 | Journal of High Energy Astrophysics                          | TQCC: 10.2
+#381 | Journal of Supply Chain Management                           | TQCC: 10.2
+#382 | Virtual and Physical Prototyping                             | TQCC: 10.2
+#383 | Natural Product Reports                                      | TQCC: 10.2
+#384 | Cardiovascular Research                                      | TQCC: 10.2
+#385 | IEEE Transactions on Neural Networks and Learning Systems    | TQCC: 10.2
+#386 | Facta Universitatis-Series Mechanical Engineering            | TQCC: 10.1
+#387 | Technology in Society                                        | TQCC: 10.1
+#388 | Journal of Product Innovation Management                     | TQCC: 10.1
+#389 | American Journal of Hematology                               | TQCC: 10.1
+#390 | Applied Energy                                               | TQCC: 10.1
+#391 | FEMS Microbiology Reviews                                    | TQCC: 10.1
+#392 | Plant Biotechnology Journal                                  | TQCC: 10.1
+#393 | Educational Psychology Review                                | TQCC: 10.1
+#394 | Engineering                                                  | TQCC: 10.1
+#395 | Environmental Health Perspectives                            | TQCC: 10.1
+#396 | Advanced Healthcare Materials                                | TQCC: 10.0
+#397 | Clinical Cancer Research                                     | TQCC: 10.0
+#398 | Materials Today Physics                                      | TQCC: 10.0
+#399 | Frontiers in Ecology and the Environment                     | TQCC: 10.0
+#400 | Plant Cell                                                   | TQCC: 10.0

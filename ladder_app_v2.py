@@ -1,7 +1,7 @@
 """
 LADDER · Gene Set Annotator
 Literature-Assisted Dual-annotation and Documentation & Evidence-based Reasoning
-Live PubMed Validation + Grounded Chat
+Live PubMed Validation
 """
 from datetime import date
 import streamlit as st
@@ -12,6 +12,7 @@ from typing import List, Dict, Any, Tuple, Optional
 from datetime import datetime
 from rapidfuzz import process as fuzz_process
 import gseapy as gp
+import html as _html
 
 # ─── Page Config ─────────────────────────────────────────────────────────────
 st.set_page_config(
@@ -26,9 +27,6 @@ st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Source+Sans+3:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300;1,9..40,400&family=JetBrains+Mono:wght@300;400;500&display=swap');
 
-/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   PALETTE  — crisp white + slate + red accent
-   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 :root {
     --bg:       #ffffff;
     --surface:  #ffffff;
@@ -48,40 +46,25 @@ st.markdown("""
     --rule:     #dee2e6;
 }
 
-/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   GLOBAL — force dark text everywhere, always
-   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 html, body { background: #ffffff !important; color: #1a1a2e !important; }
+.stApp, .stApp > div, .block-container, .block-container > div { background: #ffffff !important; }
 
-.stApp,
-.stApp > div,
-.block-container,
-.block-container > div { background: #ffffff !important; }
-
-/* Every text node Streamlit might own */
 p, span, div, li, label, h1, h2, h3, h4, h5, h6,
-td, th, caption, figcaption, summary, legend, small {
-    color: #1a1a2e !important;
-}
+td, th, caption, figcaption, summary, legend, small { color: #1a1a2e !important; }
 
-/* Streamlit's own markdown and label classes */
-.stMarkdown, .stMarkdown p, .stMarkdown span,
-.stMarkdown li, .stMarkdown h1, .stMarkdown h2,
-.stMarkdown h3, .stMarkdown h4, .stMarkdown strong,
-.stMarkdown em, .stMarkdown a { color: #1a1a2e !important; }
+.stMarkdown, .stMarkdown p, .stMarkdown span, .stMarkdown li,
+.stMarkdown h1, .stMarkdown h2, .stMarkdown h3, .stMarkdown h4,
+.stMarkdown strong, .stMarkdown em, .stMarkdown a { color: #1a1a2e !important; }
 
 [data-testid="stMarkdownContainer"],
 [data-testid="stMarkdownContainer"] * { color: #1a1a2e !important; }
 
-/* Widget labels */
-.stTextInput label, .stTextArea label,
-.stSelectbox label, .stMultiSelect label,
-.stSlider label, .stCheckbox label,
+.stTextInput label, .stTextArea label, .stSelectbox label,
+.stMultiSelect label, .stSlider label, .stCheckbox label,
 .stRadio label, .stNumberInput label,
 [data-testid="stWidgetLabel"],
 [data-testid="stWidgetLabel"] * { color: #1a1a2e !important; }
 
-/* Sidebar text */
 section[data-testid="stSidebar"],
 section[data-testid="stSidebar"] *,
 section[data-testid="stSidebar"] p,
@@ -90,36 +73,27 @@ section[data-testid="stSidebar"] label {
     color: #1a1a2e !important;
     background: #f8f9fa !important;
 }
-section[data-testid="stSidebar"] {
-    border-right: 1px solid var(--border) !important;
-}
+section[data-testid="stSidebar"] { border-right: 1px solid var(--border) !important; }
 
-/* Expander text */
 div[data-testid="stExpander"] summary,
 div[data-testid="stExpander"] summary *,
 div[data-testid="stExpander"] p,
 div[data-testid="stExpander"] span { color: #1a1a2e !important; }
 
-/* Tab text */
 .stTabs [data-baseweb="tab"] { color: #495057 !important; }
 .stTabs [aria-selected="true"] { color: #0d0d0d !important; font-weight: 600 !important; }
 
-/* Status / spinner text */
 div[data-testid="stStatus"] *,
 div[data-testid="stStatusLabel"],
 div[data-testid="stStatusLabel"] * { color: #1a1a2e !important; }
 
-/* Alert text (override per type below) */
 .stInfo *, .stSuccess *, .stWarning *, .stError * { color: inherit !important; }
 
-/* Scrollbar */
 ::-webkit-scrollbar { width: 5px; }
 ::-webkit-scrollbar-track { background: var(--surface2); }
 ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
 
-/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   HEADER
-   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+/* ── HEADER ── */
 .ladder-header {
     padding: 2.4rem 2.8rem 2rem;
     margin-bottom: 1.8rem;
@@ -129,88 +103,50 @@ div[data-testid="stStatusLabel"] * { color: #1a1a2e !important; }
 }
 .ladder-logo {
     font-family: 'EB Garamond', serif !important;
-    font-size: 2.6rem;
-    font-weight: 700;
+    font-size: 2.6rem; font-weight: 700;
     color: var(--ink) !important;
-    margin: 0;
-    line-height: 1;
-    letter-spacing: -0.5px;
+    margin: 0; line-height: 1; letter-spacing: -0.5px;
 }
 .ladder-logo span { color: var(--accent) !important; }
 .ladder-sub {
     font-family: 'Source Sans 3', sans-serif !important;
-    font-size: 0.86rem;
-    color: var(--sub) !important;
-    margin-top: 0.5rem;
-    font-weight: 400;
-    line-height: 1.55;
+    font-size: 0.86rem; color: var(--sub) !important;
+    margin-top: 0.5rem; font-weight: 400; line-height: 1.55;
 }
 .ladder-sub strong { color: var(--accent) !important; font-weight: 700; }
 .context-pill {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    margin-top: 0.9rem;
-    background: #fff5f5;
-    border: 1px solid #ffa8a8;
-    color: var(--accent) !important;
-    padding: 4px 14px;
-    border-radius: 20px;
+    display: inline-flex; align-items: center; gap: 6px;
+    margin-top: 0.9rem; background: #fff5f5;
+    border: 1px solid #ffa8a8; color: var(--accent) !important;
+    padding: 4px 14px; border-radius: 20px;
     font-family: 'JetBrains Mono', monospace;
-    font-size: 0.74rem;
-    letter-spacing: 0.02em;
+    font-size: 0.74rem; letter-spacing: 0.02em;
 }
 
-/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   STEP TRAIL
-   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+/* ── STEP TRAIL ── */
 .step-trail {
-    display: flex;
-    align-items: center;
-    margin-bottom: 2rem;
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 6px;
+    display: flex; align-items: center;
+    margin-bottom: 2rem; background: var(--surface2);
+    border: 1px solid var(--border); border-radius: 6px;
     padding: 0.55rem 1.2rem;
 }
 .step-node {
-    display: flex;
-    align-items: center;
-    gap: 6px;
+    display: flex; align-items: center; gap: 6px;
     font-family: 'JetBrains Mono', monospace;
-    font-size: 0.72rem;
-    color: var(--muted) !important;
-    padding: 4px 10px;
-    border-radius: 4px;
-    flex: 1;
-    justify-content: center;
-    letter-spacing: 0.02em;
+    font-size: 0.72rem; color: var(--muted) !important;
+    padding: 4px 10px; border-radius: 4px;
+    flex: 1; justify-content: center; letter-spacing: 0.02em;
 }
-.step-node.active {
-    background: #fff5f5;
-    color: var(--accent) !important;
-    border: 1px solid #ffa8a8;
-    font-weight: 600;
-}
-.step-node.done {
-    background: #ebfbee;
-    color: var(--green) !important;
-    border: 1px solid #b2f2bb;
-}
+.step-node.active { background: #fff5f5; color: var(--accent) !important; border: 1px solid #ffa8a8; font-weight: 600; }
+.step-node.done   { background: #ebfbee; color: var(--green) !important; border: 1px solid #b2f2bb; }
 .step-arrow { color: var(--border2); font-size: 0.7rem; flex-shrink: 0; }
 
-/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   INPUTS
-   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+/* ── INPUTS ── */
 .stTextArea > div > div > textarea {
-    background: #ffffff !important;
-    border: 1px solid var(--border) !important;
-    border-radius: 6px !important;
-    color: #1a1a2e !important;
+    background: #ffffff !important; border: 1px solid var(--border) !important;
+    border-radius: 6px !important; color: #1a1a2e !important;
     font-family: 'JetBrains Mono', monospace !important;
-    font-size: 0.82rem !important;
-    line-height: 1.75 !important;
-    box-shadow: none !important;
+    font-size: 0.82rem !important; line-height: 1.75 !important; box-shadow: none !important;
 }
 .stTextArea > div > div > textarea::placeholder { color: var(--faint) !important; }
 .stTextArea > div > div > textarea:focus {
@@ -218,13 +154,10 @@ div[data-testid="stStatusLabel"] * { color: #1a1a2e !important; }
     box-shadow: 0 0 0 3px rgba(201,42,42,0.1) !important;
 }
 .stTextInput > div > div > input {
-    background: #ffffff !important;
-    border: 1px solid var(--border) !important;
-    border-radius: 6px !important;
-    color: #1a1a2e !important;
+    background: #ffffff !important; border: 1px solid var(--border) !important;
+    border-radius: 6px !important; color: #1a1a2e !important;
     font-family: 'Source Sans 3', sans-serif !important;
-    font-size: 0.9rem !important;
-    box-shadow: none !important;
+    font-size: 0.9rem !important; box-shadow: none !important;
 }
 .stTextInput > div > div > input::placeholder { color: var(--faint) !important; }
 .stTextInput > div > div > input:focus {
@@ -232,394 +165,190 @@ div[data-testid="stStatusLabel"] * { color: #1a1a2e !important; }
     box-shadow: 0 0 0 3px rgba(201,42,42,0.1) !important;
 }
 
-/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   BUTTONS
-   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+/* ── BUTTONS ── */
 .stButton > button {
-    background: #ffffff !important;
-    border: 1px solid var(--border) !important;
-    color: #1a1a2e !important;
-    border-radius: 6px !important;
+    background: #ffffff !important; border: 1px solid var(--border) !important;
+    color: #1a1a2e !important; border-radius: 6px !important;
     font-family: 'Source Sans 3', sans-serif !important;
-    font-weight: 500 !important;
-    font-size: 0.88rem !important;
-    box-shadow: none !important;
+    font-weight: 500 !important; font-size: 0.88rem !important; box-shadow: none !important;
 }
-.stButton > button:hover {
-    background: var(--surface2) !important;
-    border-color: var(--border2) !important;
-}
+.stButton > button:hover { background: var(--surface2) !important; border-color: var(--border2) !important; }
 .stButton[data-testid="baseButton-primary"] > button,
 .stButton > button[kind="primary"] {
-    background: var(--accent) !important;
-    border: 1px solid var(--accent) !important;
-    color: #ffffff !important;
-    font-weight: 600 !important;
+    background: var(--accent) !important; border: 1px solid var(--accent) !important;
+    color: #ffffff !important; font-weight: 600 !important;
 }
 .stButton[data-testid="baseButton-primary"] > button:hover,
-.stButton > button[kind="primary"]:hover {
-    background: #a61e1e !important;
-    border-color: #a61e1e !important;
-}
+.stButton > button[kind="primary"]:hover { background: #a61e1e !important; border-color: #a61e1e !important; }
 .stDownloadButton > button {
-    background: #ffffff !important;
-    border: 1px solid var(--border) !important;
-    color: #1a1a2e !important;
-    border-radius: 6px !important;
+    background: #ffffff !important; border: 1px solid var(--border) !important;
+    color: #1a1a2e !important; border-radius: 6px !important;
     font-family: 'JetBrains Mono', monospace !important;
-    font-size: 0.74rem !important;
-    width: 100%;
+    font-size: 0.74rem !important; width: 100%;
 }
 
-/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   EXPANDER
-   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+/* ── EXPANDER ── */
 div[data-testid="stExpander"] {
-    background: #ffffff !important;
-    border: 1px solid var(--border) !important;
-    border-radius: 8px !important;
-    margin-bottom: 1rem !important;
-    overflow: hidden !important;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.06) !important;
+    background: #ffffff !important; border: 1px solid var(--border) !important;
+    border-radius: 8px !important; margin-bottom: 1rem !important;
+    overflow: hidden !important; box-shadow: 0 1px 3px rgba(0,0,0,0.06) !important;
 }
 div[data-testid="stExpander"] summary {
-    background: #ffffff !important;
-    color: #1a1a2e !important;
+    background: #ffffff !important; color: #1a1a2e !important;
     font-family: 'Source Sans 3', sans-serif !important;
-    font-weight: 500 !important;
-    font-size: 0.93rem !important;
+    font-weight: 500 !important; font-size: 0.93rem !important;
     padding: 0.9rem 1.2rem !important;
 }
 div[data-testid="stExpander"] summary:hover { background: var(--surface2) !important; }
 div[data-testid="stExpander"] > div[role="region"] {
-    background: #ffffff !important;
-    border-top: 1px solid var(--border) !important;
+    background: #ffffff !important; border-top: 1px solid var(--border) !important;
     padding: 1.2rem 1.4rem !important;
 }
 
-/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   TABS
-   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+/* ── TABS ── */
 .stTabs [data-baseweb="tab-list"] {
-    background: transparent !important;
-    border-bottom: 2px solid var(--border) !important;
-    padding: 0 !important;
-    gap: 0 !important;
-    border-radius: 0 !important;
+    background: transparent !important; border-bottom: 2px solid var(--border) !important;
+    padding: 0 !important; gap: 0 !important; border-radius: 0 !important;
 }
 .stTabs [data-baseweb="tab"] {
-    background: transparent !important;
-    color: var(--muted) !important;
-    border-radius: 0 !important;
-    border-bottom: 2px solid transparent !important;
-    margin-bottom: -2px !important;
-    font-family: 'Source Sans 3', sans-serif !important;
-    font-size: 0.87rem !important;
-    font-weight: 400 !important;
-    padding: 8px 18px !important;
+    background: transparent !important; color: var(--muted) !important;
+    border-radius: 0 !important; border-bottom: 2px solid transparent !important;
+    margin-bottom: -2px !important; font-family: 'Source Sans 3', sans-serif !important;
+    font-size: 0.87rem !important; font-weight: 400 !important; padding: 8px 18px !important;
 }
 .stTabs [aria-selected="true"] {
-    background: transparent !important;
-    color: var(--ink) !important;
-    border-bottom: 2px solid var(--accent) !important;
-    font-weight: 600 !important;
+    background: transparent !important; color: var(--ink) !important;
+    border-bottom: 2px solid var(--accent) !important; font-weight: 600 !important;
 }
-.stTabs [data-baseweb="tab-panel"] {
-    background: transparent !important;
-    padding: 1.2rem 0 !important;
-}
+.stTabs [data-baseweb="tab-panel"] { background: transparent !important; padding: 1.2rem 0 !important; }
 
-/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   SELECTBOX
-   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+/* ── SELECTBOX ── */
 .stSelectbox > div > div {
-    background: #ffffff !important;
-    border: 1px solid var(--border) !important;
-    color: #1a1a2e !important;
-    border-radius: 6px !important;
-    box-shadow: none !important;
+    background: #ffffff !important; border: 1px solid var(--border) !important;
+    color: #1a1a2e !important; border-radius: 6px !important; box-shadow: none !important;
 }
 .stSelectbox > div > div * { color: #1a1a2e !important; }
 
-/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   ALERTS
-   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+/* ── ALERTS ── */
 .stInfo > div {
-    background: #e7f5ff !important;
-    border: 1px solid #74c0fc !important;
-    border-left: 4px solid var(--accent2) !important;
-    border-radius: 6px !important;
-    color: #1864ab !important;
+    background: #e7f5ff !important; border: 1px solid #74c0fc !important;
+    border-left: 4px solid var(--accent2) !important; border-radius: 6px !important; color: #1864ab !important;
 }
 .stInfo > div * { color: #1864ab !important; }
 .stSuccess > div {
-    background: #ebfbee !important;
-    border: 1px solid #8ce99a !important;
-    border-left: 4px solid var(--green) !important;
-    border-radius: 6px !important;
-    color: #2b8a3e !important;
+    background: #ebfbee !important; border: 1px solid #8ce99a !important;
+    border-left: 4px solid var(--green) !important; border-radius: 6px !important; color: #2b8a3e !important;
 }
 .stSuccess > div * { color: #2b8a3e !important; }
 .stWarning > div {
-    background: #fff9db !important;
-    border: 1px solid #ffe066 !important;
-    border-left: 4px solid var(--amber) !important;
-    border-radius: 6px !important;
-    color: #e67700 !important;
+    background: #fff9db !important; border: 1px solid #ffe066 !important;
+    border-left: 4px solid var(--amber) !important; border-radius: 6px !important; color: #e67700 !important;
 }
 .stWarning > div * { color: #e67700 !important; }
 .stError > div {
-    background: #fff5f5 !important;
-    border: 1px solid #ffa8a8 !important;
-    border-left: 4px solid var(--accent) !important;
-    border-radius: 6px !important;
-    color: #c92a2a !important;
+    background: #fff5f5 !important; border: 1px solid #ffa8a8 !important;
+    border-left: 4px solid var(--accent) !important; border-radius: 6px !important; color: #c92a2a !important;
 }
 .stError > div * { color: #c92a2a !important; }
 
-/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   STATUS WIDGET
-   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+/* ── STATUS ── */
 div[data-testid="stStatus"] {
-    background: #ffffff !important;
-    border: 1px solid var(--border) !important;
-    border-radius: 8px !important;
-    box-shadow: none !important;
+    background: #ffffff !important; border: 1px solid var(--border) !important;
+    border-radius: 8px !important; box-shadow: none !important;
 }
 div[data-testid="stStatus"] * { color: #1a1a2e !important; }
 
-/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   PROGRESS BAR
-   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+/* ── PROGRESS ── */
 .stProgress > div { background: var(--surface3) !important; border-radius: 4px !important; }
 .stProgress > div > div > div { background: var(--accent) !important; border-radius: 4px !important; }
 
-/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   DIVIDER
-   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 hr { border: none !important; border-top: 1px solid var(--rule) !important; margin: 1.5rem 0 !important; }
 
-/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   CUSTOM COMPONENTS — all text hardcoded dark
-   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+/* ── CUSTOM COMPONENTS ── */
 .section-label {
     font-family: 'Source Sans 3', sans-serif;
-    font-size: 0.7rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.12em;
-    color: var(--faint) !important;
-    margin-bottom: 6px;
-    display: block;
+    font-size: 0.7rem; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.12em;
+    color: var(--faint) !important; margin-bottom: 6px; display: block;
 }
-
 .gene-chip {
-    display: inline-block;
-    background: #e7f5ff;
-    border: 1px solid #74c0fc;
-    color: #1864ab !important;
-    padding: 1px 8px;
-    border-radius: 4px;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 0.71rem;
-    margin: 2px;
+    display: inline-block; background: #e7f5ff;
+    border: 1px solid #74c0fc; color: #1864ab !important;
+    padding: 1px 8px; border-radius: 4px;
+    font-family: 'JetBrains Mono', monospace; font-size: 0.71rem; margin: 2px;
 }
 .enrichment-chip {
-    display: inline-block;
-    background: #ebfbee;
-    border: 1px solid #8ce99a;
-    color: #2b8a3e !important;
-    padding: 2px 9px;
-    border-radius: 4px;
-    font-size: 0.72rem;
-    margin: 2px;
-    font-family: 'Source Sans 3', sans-serif;
+    display: inline-block; background: #ebfbee;
+    border: 1px solid #8ce99a; color: #2b8a3e !important;
+    padding: 2px 9px; border-radius: 4px;
+    font-size: 0.72rem; margin: 2px; font-family: 'Source Sans 3', sans-serif;
 }
-
 .conf-bar-wrap { margin: 5px 0 10px; }
 .conf-label {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 0.68rem;
-    color: var(--sub) !important;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    margin-bottom: 4px;
-    display: flex;
-    justify-content: space-between;
+    font-family: 'JetBrains Mono', monospace; font-size: 0.68rem;
+    color: var(--sub) !important; text-transform: uppercase;
+    letter-spacing: 0.05em; margin-bottom: 4px;
+    display: flex; justify-content: space-between;
 }
 .conf-bar { height: 5px; background: var(--surface3); border-radius: 3px; overflow: hidden; }
 .conf-bar-fill { height: 100%; transition: width 0.3s ease; border-radius: 3px; }
-
 .process-heading {
-    font-family: 'EB Garamond', serif;
-    font-size: 1.05rem;
-    font-weight: 500;
-    color: var(--ink) !important;
-    margin: 4px 0 10px;
-    line-height: 1.45;
+    font-family: 'EB Garamond', serif; font-size: 1.05rem;
+    font-weight: 500; color: var(--ink) !important;
+    margin: 4px 0 10px; line-height: 1.45;
 }
 .final-process {
-    font-family: 'EB Garamond', serif;
-    font-size: 1.2rem;
-    font-weight: 600;
-    margin: 4px 0 10px;
-    line-height: 1.3;
-    color: var(--ink) !important;
+    font-family: 'EB Garamond', serif; font-size: 1.2rem;
+    font-weight: 600; margin: 4px 0 10px; line-height: 1.3; color: var(--ink) !important;
 }
-
 .badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    padding: 2px 10px;
-    border-radius: 20px;
-    font-size: 0.72rem;
-    font-weight: 600;
-    font-family: 'JetBrains Mono', monospace;
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 2px 10px; border-radius: 20px;
+    font-size: 0.72rem; font-weight: 600; font-family: 'JetBrains Mono', monospace;
 }
 .badge-conflict { background: #fff9db; color: #e67700 !important; border: 1px solid #ffe066; }
 .badge-ok       { background: #ebfbee; color: #2b8a3e !important; border: 1px solid #8ce99a; }
 .badge-paper    { background: #e7f5ff; color: #1864ab !important; border: 1px solid #74c0fc; }
 .badge-star     { background: #fff5f5; color: #c92a2a !important; border: 1px solid #ffa8a8; }
-
 .paper-card {
-    background: #ffffff;
-    border: 1px solid var(--border);
-    border-left: 3px solid var(--border2);
-    border-radius: 6px;
-    padding: 0.9rem 1rem;
-    margin-bottom: 0.65rem;
+    background: #ffffff; border: 1px solid var(--border);
+    border-left: 3px solid var(--border2); border-radius: 6px;
+    padding: 0.9rem 1rem; margin-bottom: 0.65rem;
 }
 .paper-card.top-journal { border-left-color: var(--accent2); }
 .paper-title {
-    font-family: 'EB Garamond', serif;
-    font-weight: 500;
-    font-size: 0.97rem;
-    color: var(--ink) !important;
-    margin-bottom: 4px;
-    line-height: 1.5;
+    font-family: 'EB Garamond', serif; font-weight: 500;
+    font-size: 0.97rem; color: var(--ink) !important;
+    margin-bottom: 4px; line-height: 1.5;
 }
 .paper-meta {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 0.68rem;
-    color: var(--muted) !important;
-    margin-bottom: 6px;
+    font-family: 'JetBrains Mono', monospace; font-size: 0.68rem;
+    color: var(--muted) !important; margin-bottom: 6px;
 }
 .paper-abstract {
-    font-size: 0.83rem;
-    color: var(--sub) !important;
-    line-height: 1.7;
-    font-family: 'Source Sans 3', sans-serif;
+    font-size: 0.83rem; color: var(--sub) !important;
+    line-height: 1.7; font-family: 'Source Sans 3', sans-serif;
 }
 .paper-scroll { max-height: 540px; overflow-y: auto; padding-right: 6px; }
-
 .metrics-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 10px; }
 .metric-box {
-    background: #ffffff;
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 0.85rem 0.9rem;
-    text-align: center;
+    background: #ffffff; border: 1px solid var(--border);
+    border-radius: 8px; padding: 0.85rem 0.9rem; text-align: center;
 }
 .metric-num {
-    font-family: 'EB Garamond', serif;
-    font-size: 1.75rem;
-    font-weight: 600;
-    color: var(--ink) !important;
-    line-height: 1;
+    font-family: 'EB Garamond', serif; font-size: 1.75rem;
+    font-weight: 600; color: var(--ink) !important; line-height: 1;
 }
 .metric-lbl {
-    font-family: 'Source Sans 3', sans-serif;
-    font-size: 0.64rem;
-    font-weight: 700;
-    color: var(--faint) !important;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    margin-top: 3px;
+    font-family: 'Source Sans 3', sans-serif; font-size: 0.64rem;
+    font-weight: 700; color: var(--faint) !important;
+    text-transform: uppercase; letter-spacing: 0.1em; margin-top: 3px;
 }
 
-.chat-wrap {
-    background: #ffffff;
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 1.4rem 1.5rem;
-    margin-top: 1rem;
-}
-.chat-bubble-user {
-    background: #fff5f5;
-    border: 1px solid #ffa8a8;
-    color: var(--ink) !important;
-    padding: 9px 14px;
-    border-radius: 8px 8px 2px 8px;
-    margin: 6px 0;
-    margin-left: 15%;
-    font-size: 0.88rem;
-    line-height: 1.65;
-    font-family: 'Source Sans 3', sans-serif;
-}
-.chat-bubble-bot {
+/* ── RAW OUTPUT — light theme, no dark background ── */
+.raw-output-block {
     background: var(--surface2);
     border: 1px solid var(--border);
-    color: var(--ink) !important;
-    padding: 11px 14px;
-    border-radius: 8px 8px 8px 2px;
-    margin: 6px 0;
-    margin-right: 10%;
-    font-size: 0.88rem;
-    line-height: 1.75;
-    font-family: 'Source Sans 3', sans-serif;
-}
-.chat-role {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 0.63rem;
-    color: var(--faint) !important;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    margin-bottom: 3px;
-}
-.grounding-note {
-    display: flex;
-    align-items: flex-start;
-    gap: 8px;
-    background: #e7f5ff;
-    border: 1px solid #74c0fc;
-    border-left: 4px solid var(--accent2);
-    border-radius: 6px;
-    padding: 9px 13px;
-    font-family: 'Source Sans 3', sans-serif;
-    font-size: 0.83rem;
-    color: #1864ab !important;
-    margin-bottom: 1rem;
-    line-height: 1.55;
-}
-
-/* ── Chat input ── */
-div[data-testid="stChatInput"] > div {
-    background: #ffffff !important;
-    border: 1px solid var(--border) !important;
-    border-radius: 8px !important;
-    box-shadow: none !important;
-}
-div[data-testid="stChatInput"] textarea {
-    background: transparent !important;
-    color: #1a1a2e !important;
-    font-family: 'Source Sans 3', sans-serif !important;
-}
-
-/* ── Code blocks (Streamlit st.code override) ── */
-.stCode > div, code, pre {
-    background: #f8f9fa !important;
-    border: 1px solid var(--border) !important;
-    color: var(--ink) !important;
-    font-family: 'JetBrains Mono', monospace !important;
-    font-size: 0.78rem !important;
-    border-radius: 6px !important;
-}
-
-/* ── Raw output pre blocks ── */
-.raw-output-block {
-    background: #1e2030;
-    border: 1px solid #373d4a;
     border-radius: 6px;
     padding: 1rem 1.2rem;
     overflow-x: auto;
@@ -634,59 +363,52 @@ div[data-testid="stChatInput"] textarea {
     font-family: 'JetBrains Mono', monospace;
     font-size: 0.75rem;
     line-height: 1.75;
-    color: #cdd6f4 !important;
+    color: var(--sub) !important;
     background: transparent;
     border: none !important;
 }
 .raw-output-label {
     font-family: 'JetBrains Mono', monospace;
-    font-size: 0.66rem;
-    font-weight: 600;
+    font-size: 0.66rem; font-weight: 600;
     color: var(--faint) !important;
-    text-transform: uppercase;
-    letter-spacing: 0.12em;
-    margin: 0 0 6px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
+    text-transform: uppercase; letter-spacing: 0.12em;
+    margin: 0 0 6px; display: flex; align-items: center; gap: 8px;
 }
 .raw-output-label::after {
-    content: '';
-    flex: 1;
-    height: 1px;
-    background: var(--border);
+    content: ''; flex: 1; height: 1px; background: var(--border);
 }
 
-/* ── Column rule ── */
-.result-divider { border-left: 1px solid var(--rule); }
+/* ── NCBI key input hint ── */
+.key-hint {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.68rem; color: var(--faint) !important;
+    margin-top: 3px; line-height: 1.5;
+}
 </style>
 """, unsafe_allow_html=True)
 
 # ─── Constants ────────────────────────────────────────────────────────────────
-DEEPSEEK_URL  = "https://api.deepseek.com/v1/chat/completions"
-NCBI_BASE     = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils"
-JOURNAL_FILE  = "complete_high_tqcc_journals.txt"
+DEEPSEEK_URL = "https://api.deepseek.com/v1/chat/completions"
+NCBI_BASE    = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils"
+JOURNAL_FILE = "complete_high_tqcc_journals.txt"
 
 # ─── Session State ────────────────────────────────────────────────────────────
 _DEFAULTS = {
-    "api_key": "",
-    "context": "Acute Myeloid Leukemia (AML)",
-    "results": [],
-    "step": 0,
-    "chat_history": {},   # {comm_id: [{"role": ..., "content": ...}]}
-    "running": False,
+    "api_key":    "",
+    "ncbi_email": "",
+    "ncbi_key":   "",
+    "context":    "Acute Myeloid Leukemia (AML)",
+    "results":    [],
+    "step":       0,
+    "running":    False,
 }
 for k, v in _DEFAULTS.items():
     if k not in st.session_state:
         st.session_state[k] = v
 
-# ─── Load Top Journals (local file, cached) ───────────────────────────────────
+# ─── Load Top Journals ────────────────────────────────────────────────────────
 @st.cache_resource
 def load_top_journals() -> Dict[str, int]:
-    """
-    Returns {normalized_journal_name: rank} where rank=1 is highest priority.
-    Parses lines like:  #1 | CA-A Cancer Journal for Clinicians | TQCC: 503.1
-    """
     try:
         with open(JOURNAL_FILE, "r", encoding="utf-8") as f:
             lines = f.readlines()
@@ -698,7 +420,7 @@ def load_top_journals() -> Dict[str, int]:
             if "|" in line:
                 parts = line.split("|")
                 if len(parts) >= 3:
-                    rank_str = parts[0].strip().lstrip("#")   # "1", "2", …
+                    rank_str = parts[0].strip().lstrip("#")
                     name     = parts[1].strip()
                     if name and rank_str.isdigit():
                         norm = normalize_journal(name)
@@ -723,17 +445,11 @@ def normalize_journal(name: str) -> str:
     return name.strip()
 
 
-# Initialise after normalize_journal is defined
-TOP_JOURNALS: Dict[str, int] = load_top_journals()
-TOP_JOURNALS_NORMALIZED: set  = set(TOP_JOURNALS.keys())
+TOP_JOURNALS: Dict[str, int]   = load_top_journals()
+TOP_JOURNALS_NORMALIZED: set   = set(TOP_JOURNALS.keys())
 
 
 def get_journal_rank(journal_name: str) -> int:
-    """
-    Return the TQCC rank of a journal (lower = higher priority).
-    Returns 99999 for journals not in the list.
-    Uses fuzzy matching to handle minor name variants.
-    """
     norm  = normalize_journal(journal_name)
     match = fuzz_process.extractOne(norm, TOP_JOURNALS_NORMALIZED, score_cutoff=85)
     if match:
@@ -743,7 +459,6 @@ def get_journal_rank(journal_name: str) -> int:
 
 # ─── Helpers ──────────────────────────────────────────────────────────────────
 def conf_bar_html(score: float, label: str, delta_icon: str = "") -> str:
-    """Render a confidence bar as HTML."""
     pct = int(score * 100)
     if score >= 0.70:
         color = "#4dac26"
@@ -762,34 +477,27 @@ def conf_bar_html(score: float, label: str, delta_icon: str = "") -> str:
         </div>
     </div>"""
 
+
 def delta_icon(before: float, after: float) -> str:
     d = after - before
-    if d > 0.05:   return "↑"
-    if d < -0.05:  return "↓"
+    if d > 0.05:  return "↑"
+    if d < -0.05: return "↓"
     return "→"
+
 
 def gene_chips(genes: List[str]) -> str:
     return " ".join(f'<span class="gene-chip">{g}</span>' for g in genes)
 
+
 def enrich_chips(pathways: List[str]) -> str:
-    return " ".join(f'<span class="enrichment-chip">{p[:60]}{"…" if len(p)>60 else ""}</span>' for p in pathways[:12])
+    return " ".join(
+        f'<span class="enrichment-chip">{p[:60]}{"…" if len(p) > 60 else ""}</span>'
+        for p in pathways[:12]
+    )
+
 
 # ─── Community Parser ─────────────────────────────────────────────────────────
 def parse_communities(text: str) -> Dict[str, List[str]]:
-    """
-    Flexible parser for gene set input. Accepts multiple formats:
-
-        Gene Set 1: BRCA1, TP53, MDM2
-        Set 1: BRCA1, TP53
-        1: BRCA1, TP53
-        Community 1: BRCA1, TP53
-        Refined Community 1: ['BRCA1', 'TP53']   ← pipeline internal format also works
-
-    Lines that do not match any pattern are ignored.
-    Gene lists may optionally be wrapped in [ ] brackets and/or quoted.
-    Entries that span multiple lines (bracket not yet closed) are merged first.
-    """
-    # ── Step 1: merge continuation lines (bracket wrapping that spans lines) ──
     joined_lines: List[str] = []
     buffer = ""
     for raw_line in text.split("\n"):
@@ -811,7 +519,6 @@ def parse_communities(text: str) -> Dict[str, List[str]]:
     if buffer:
         joined_lines.append(buffer)
 
-    # ── Step 2: parse each merged line ───────────────────────────────────────
     PATTERN = re.compile(
         r"(?:(?:Refined\s+)?(?:Community|Gene\s*Set|Set)\s*)?(\d+)\s*:\s*\[?(.+?)\]?$",
         re.IGNORECASE,
@@ -841,6 +548,7 @@ def parse_communities(text: str) -> Dict[str, List[str]]:
             communities[comm_id] = genes
     return communities
 
+
 # ─── Enrichment ───────────────────────────────────────────────────────────────
 def perform_enrichment(genes: List[str]) -> List[str]:
     try:
@@ -856,8 +564,9 @@ def perform_enrichment(genes: List[str]) -> List[str]:
                 out += list(df.head(5)["Term"])
         return list(set(out))
     except Exception as e:
-        st.error(f"Enrichment error ({db}): {type(e).__name__}: {e}")
-    
+        st.error(f"Enrichment error: {type(e).__name__}: {e}")
+        return []
+
 
 # ─── DeepSeek calls ───────────────────────────────────────────────────────────
 def _ds_system(context: str) -> str:
@@ -865,21 +574,23 @@ def _ds_system(context: str) -> str:
             "Provide detailed pathway analysis with scientific literature support. "
             "Always cite specific papers when discussing pathway relationships.")
 
+
 def _ds_call(api_key: str, system: str, prompt: str, max_tokens: int = 4000) -> str:
     hdrs = {"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"}
     body = {
         "model": "deepseek-chat",
         "messages": [
-            {"role": "system",  "content": system},
-            {"role": "user",    "content": prompt},
+            {"role": "system", "content": system},
+            {"role": "user",   "content": prompt},
         ],
         "temperature": 0,
-        "max_tokens":   max_tokens,
+        "max_tokens":  max_tokens,
     }
     r = requests.post(DEEPSEEK_URL, headers=hdrs, json=body, timeout=180)
     if r.status_code == 200:
         return r.json()["choices"][0]["message"]["content"]
     raise Exception(f"DeepSeek {r.status_code}: {r.text[:300]}")
+
 
 # ─── Annotation Prompt ────────────────────────────────────────────────────────
 def create_all_in_one_prompt(genes: List[str], enrichment_pathways: List[str]) -> str:
@@ -958,6 +669,7 @@ Confidence Score Instructions:
 - 0.00 indicates lowest confidence
 - 1.00 reflects highest confidence
 - Base the score on the proportion of genes participating in the identified process"""
+
 
 # ─── Validation Prompt ────────────────────────────────────────────────────────
 def create_validation_prompt(
@@ -1043,6 +755,7 @@ VALIDATION ANALYSIS TEXT:
 **MANDATORY CITATION FORMAT: When mentioning any paper numbers, you MUST include the COMPLETE citation with FULL TITLES AND AUTHORS - NOT JUST PARTIAL CITATIONS**]
 """
 
+
 # ─── Response Parsers ─────────────────────────────────────────────────────────
 def _clean(text: str) -> str:
     if not text or not isinstance(text, str):
@@ -1051,6 +764,7 @@ def _clean(text: str) -> str:
     text = re.sub(r"\*([^*]+)\*",     r"\1", text)
     text = re.sub(r"(?<!\w)\*(?!\w)", "",    text)
     return text.strip()
+
 
 def _extract_section(text: str, section_name: str) -> str:
     patterns = [
@@ -1066,6 +780,7 @@ def _extract_section(text: str, section_name: str) -> str:
                 return _clean(result)
     return f"{section_name} not found"
 
+
 def _extract_process_info(text: str, prefix: str) -> Tuple[str, float]:
     patterns = [
         rf"PROCESS {prefix} ENRICHMENT:\s*([^(]+?)\s*\(([0-9.]+)\)",
@@ -1075,7 +790,7 @@ def _extract_process_info(text: str, prefix: str) -> Tuple[str, float]:
     for pat in patterns:
         m = re.search(pat, text, re.IGNORECASE | re.DOTALL)
         if m:
-            name  = _clean(m.group(1).strip())
+            name = _clean(m.group(1).strip())
             try:
                 conf = float(m.group(2))
                 if name and conf >= 0:
@@ -1088,6 +803,7 @@ def _extract_process_info(text: str, prefix: str) -> Tuple[str, float]:
         name = _clean(re.sub(r"\s*\([^)]*$", "", m.group(1)).strip())
         return name, 0.0
     return f"Unknown Process {prefix} Enrichment", 0.0
+
 
 def _parse_validation(response: str) -> Dict[str, Any]:
     res: Dict[str, Any] = {}
@@ -1111,13 +827,49 @@ def _parse_validation(response: str) -> Dict[str, Any]:
 
 
 # ─── PubMed Fetching ──────────────────────────────────────────────────────────
-def fetch_pubmed_papers(genes: List[str], context: str, max_papers: int = 50) -> List[Dict]:
+def build_pubmed_query(genes: List[str], context: str) -> str:
+    """
+    Build a valid PubMed query for any user-supplied context.
+
+    - Gene terms: each gene quoted and field-tagged individually, joined with OR.
+    - Context: comma-separated phrases are split, each quoted and field-tagged,
+      joined with OR and wrapped in AND.
+    - All multi-word phrases are properly quoted so PubMed applies the field
+      tag to the entire phrase, not just the last word.
+    """
+    # Gene terms — all genes included, query sent via POST to avoid URL length limits
+    gene_terms = " OR ".join(
+        f'"{g}"[Title/Abstract]' for g in genes
+    )
+
+    # Context terms — split on comma, strip parens/extra whitespace, quote each phrase
+    ctx_parts = [
+        re.sub(r"[()]+", "", c).strip()
+        for c in context.split(",")
+        if re.sub(r"[()]+", "", c).strip()
+    ]
+    ctx_terms = " OR ".join(f'"{c}"[Title/Abstract]' for c in ctx_parts)
+
+    today = date.today().strftime("%Y/%m/%d")
+    return (
+        f'({gene_terms}) AND ({ctx_terms})'
+        f' AND ("2015/01/01"[PDAT] : "{today}"[PDAT])'
+    )
+
+
+def fetch_pubmed_papers(
+    genes: List[str],
+    context: str,
+    ncbi_email: str,
+    ncbi_key: str,
+    max_papers: int = 50,
+) -> List[Dict]:
     """
     Fetch up to max_papers unique papers from PubMed.
 
     Selection logic:
-      1. Build a query from gene names (up to 15) + disease context.
-      2. esearch returns up to 200 PMIDs ranked by PubMed relevance.
+      1. Build a properly quoted phrase query from gene names + all context terms.
+      2. esearch returns up to 300 PMIDs ranked by PubMed relevance.
       3. efetch retrieves full XML for those PMIDs.
       4. Parse every article — no gene-mention filter. Only skip if no abstract.
       5. Deduplicate by PMID.
@@ -1125,24 +877,32 @@ def fetch_pubmed_papers(genes: List[str], context: str, max_papers: int = 50) ->
          in the abstract (desc) as a secondary tiebreaker.
       7. Return the top max_papers.
     """
-    gene_terms = " OR ".join(f'"{g}"[Title/Abstract]' for g in genes)
-    ctx_clean  = re.sub(r"[()]+", "", context).strip()
-    query      = f"({gene_terms}) AND ({ctx_clean}[Title/Abstract])"
-    today      = date.today().strftime("%Y/%m/%d")
+    query = build_pubmed_query(genes, context)
 
-    # 1. esearch
+    # Base params — add credentials only when provided
+    def _params(extra: dict) -> dict:
+        p = {**extra}
+        if ncbi_email:
+            p["email"] = ncbi_email
+            p["tool"]  = "LADDER_GeneSetAnnotator"
+        if ncbi_key:
+            p["api_key"] = ncbi_key
+        return p
+
+    # 1. esearch — POST avoids URL length limits for large gene queries (140+ genes)
     try:
         time.sleep(0.34)
-        r = requests.get(f"{NCBI_BASE}/esearch.fcgi", params={
-            "db":       "pubmed",
-            "term":     query,
-            "retmax":   300,
-            "retmode":  "json",
-            "sort":     "relevance",
-            "datetype": "pdat",
-            "mindate":  "2015/01/01",
-            "maxdate":  today,
-        }, timeout=30)
+        r = requests.post(
+            f"{NCBI_BASE}/esearch.fcgi",
+            data=_params({
+                "db":      "pubmed",
+                "term":    query,
+                "retmax":  300,
+                "retmode": "json",
+                "sort":    "relevance",
+            }),
+            timeout=30,
+        )
         pmids = r.json().get("esearchresult", {}).get("idlist", [])
     except Exception:
         return []
@@ -1153,47 +913,45 @@ def fetch_pubmed_papers(genes: List[str], context: str, max_papers: int = 50) ->
     # 2. efetch XML
     try:
         time.sleep(0.34)
-        r2 = requests.get(f"{NCBI_BASE}/efetch.fcgi", params={
-            "db":      "pubmed",
-            "id":      ",".join(pmids[:300]),
-            "rettype": "abstract",
-            "retmode": "xml",
-        }, timeout=60)
+        r2 = requests.get(
+            f"{NCBI_BASE}/efetch.fcgi",
+            params=_params({
+                "db":      "pubmed",
+                "id":      ",".join(pmids[:300]),
+                "rettype": "abstract",
+                "retmode": "xml",
+            }),
+            timeout=60,
+        )
         root = ET.fromstring(r2.content)
     except Exception:
         return []
 
-    seen_pmids: set  = set()
-    papers: List[Dict] = []
+    seen_pmids: set     = set()
+    papers: List[Dict]  = []
 
     for art in root.findall(".//PubmedArticle"):
         try:
-            # PMID — deduplicate
             pm   = art.find(".//PMID")
             pmid = pm.text.strip() if pm is not None and pm.text else ""
             if pmid in seen_pmids:
                 continue
             seen_pmids.add(pmid)
 
-            # Abstract — skip if absent
             abs_parts = art.findall(".//AbstractText")
             abstract  = " ".join("".join(p.itertext()) for p in abs_parts).strip()
             if not abstract:
                 continue
 
-            # Title
             te    = art.find(".//ArticleTitle")
             title = "".join(te.itertext()).strip() if te is not None else "No title"
 
-            # Journal
             je      = art.find(".//Journal/Title")
             journal = je.text.strip() if je is not None and je.text else "Unknown"
 
-            # Year
             ye   = art.find(".//PubDate/Year")
             year = ye.text if ye is not None else "Unknown"
 
-            # Authors (up to 6 + et al.)
             auth_els = art.findall(".//Author")
             names    = []
             for a in auth_els[:6]:
@@ -1203,15 +961,13 @@ def fetch_pubmed_papers(genes: List[str], context: str, max_papers: int = 50) ->
                     names.append(f"{ln} {fn}".strip())
             authors = ", ".join(names) + (" et al." if len(auth_els) > 6 else "")
 
-            # Genes mentioned in abstract (informational only — not a filter)
             mentioned = [
                 g for g in genes
                 if re.search(rf"\b{re.escape(g)}\b", abstract, re.IGNORECASE)
             ]
 
-            # Journal rank from TQCC list
-            j_rank  = get_journal_rank(journal)
-            is_top  = j_rank < 99999
+            j_rank = get_journal_rank(journal)
+            is_top = j_rank < 99999
 
             papers.append({
                 "title":           title,
@@ -1228,66 +984,28 @@ def fetch_pubmed_papers(genes: List[str], context: str, max_papers: int = 50) ->
         except Exception:
             continue
 
-    # 3. Sort: best TQCC rank first; within same rank, more gene mentions first
+    # Sort: best TQCC rank first; within same rank, more gene mentions first
     papers.sort(key=lambda x: (x["journal_rank"], -x["gene_count"]))
-
     return papers[:max_papers]
 
 
-# ─── Grounded Chat ────────────────────────────────────────────────────────────
-def chat_grounded(question: str, result: Dict, history: List[Dict], api_key: str) -> str:
-    papers_ctx = ""
-    for i, p in enumerate(result.get("papers", [])[:25], 1):
-        papers_ctx += (f"[Paper {i}] {p['title']} | {p['journal']} ({p['year']})\n"
-                       f"Genes: {', '.join(p['genes_mentioned'])}\n"
-                       f"Abstract: {p['abstract']}\n\n")
-
-    system = f"""You are a scientific assistant answering questions about one specific gene set.
-
-STRICT RULES:
-1. Answer ONLY from the analysis data and papers provided below.
-2. If the answer is not in the context, respond: "I don't have sufficient evidence from this community's analysis to answer that."
-3. Do NOT use external knowledge or speculate beyond the provided text.
-4. When citing papers, include the full title and journal.
-
-=== GENE SET {result['community_id']} ANALYSIS ===
-Genes: {', '.join(result['genes'])}
-Final Process: {result.get('final_process', 'Unknown')}
-Final Confidence: {result.get('final_conf', 0)}
-
-Analysis (with enrichment): {result.get('analysis_with', '')[:900]}
-
-Analysis (without enrichment): {result.get('analysis_without', '')[:900]}
-
-Validation summary: {result.get('validation_text', '')[:900]}
-
-Supporting citations:
-{chr(10).join(result.get('citations', [])[:10])}
-
-=== FETCHED PAPERS ===
-{papers_ctx}"""
-
-    messages = [{"role": "system", "content": system}]
-    for h in history[-6:]:
-        messages.append({"role": h["role"], "content": h["content"]})
-    messages.append({"role": "user", "content": question})
-
-    hdrs = {"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"}
-    body = {"model": "deepseek-chat", "messages": messages,
-            "temperature": 0, "max_tokens": 1200}
-    r = requests.post(DEEPSEEK_URL, headers=hdrs, json=body, timeout=60)
-    if r.status_code == 200:
-        return r.json()["choices"][0]["message"]["content"]
-    return f"⚠️ API error {r.status_code}. Please try again."
-
 # ─── Main Pipeline ────────────────────────────────────────────────────────────
-def run_pipeline(communities: Dict[str, List[str]], api_key: str, context: str) -> List[Dict]:
+def run_pipeline(
+    communities: Dict[str, List[str]],
+    api_key: str,
+    context: str,
+    ncbi_email: str,
+    ncbi_key: str,
+) -> List[Dict]:
     results = []
     system  = _ds_system(context)
     total   = len(communities)
 
     for idx, (comm_id, genes) in enumerate(communities.items(), 1):
-        with st.status(f"Community {comm_id}  ·  {len(genes)} genes  ({idx}/{total})", expanded=True) as status:
+        with st.status(
+            f"Community {comm_id}  ·  {len(genes)} genes  ({idx}/{total})",
+            expanded=True,
+        ) as status:
             r: Dict[str, Any] = {"community_id": comm_id, "genes": genes}
 
             # 1 — Enrichment
@@ -1296,8 +1014,8 @@ def run_pipeline(communities: Dict[str, List[str]], api_key: str, context: str) 
 
             # 2 — Annotation
             status.update(label=f"Community {comm_id} · 🤖 LLM annotation…")
-            prompt       = create_all_in_one_prompt(genes, r["enrichment"])
-            full_text    = _ds_call(api_key, system, prompt, max_tokens=4000)
+            prompt    = create_all_in_one_prompt(genes, r["enrichment"])
+            full_text = _ds_call(api_key, system, prompt, max_tokens=4000)
             r["full_text"] = full_text
 
             proc_with,    conf_with    = _extract_process_info(full_text, "WITH")
@@ -1317,7 +1035,7 @@ def run_pipeline(communities: Dict[str, List[str]], api_key: str, context: str) 
 
             # 3 — PubMed
             status.update(label=f"Community {comm_id} · 📚 Fetching PubMed papers…")
-            papers      = fetch_pubmed_papers(genes, context, max_papers=50)
+            papers      = fetch_pubmed_papers(genes, context, ncbi_email, ncbi_key, max_papers=50)
             r["papers"] = papers
             top_j       = sum(1 for p in papers if p["is_top_journal"])
 
@@ -1363,37 +1081,80 @@ def run_pipeline(communities: Dict[str, List[str]], api_key: str, context: str) 
                 state="complete",
             )
         results.append(r)
-        if comm_id not in st.session_state.chat_history:
-            st.session_state.chat_history[comm_id] = []
 
     return results
+
 
 # ════════════════════════════════════════════════════════════════════════════════
 #   UI
 # ════════════════════════════════════════════════════════════════════════════════
 
-# ─── Sidebar ─────────────────────────────────────────────────────────────────
+# ─── Sidebar ──────────────────────────────────────────────────────────────────
 with st.sidebar:
-    st.markdown('<span class="section-label">API Key</span>', unsafe_allow_html=True)
-    ak = st.text_input("DeepSeek API Key", type="password",
-                        value=st.session_state.api_key, placeholder="sk-…",
-                        label_visibility="collapsed")
+
+    # ── DeepSeek API key ──
+    st.markdown('<span class="section-label">DeepSeek API Key</span>', unsafe_allow_html=True)
+    ak = st.text_input(
+        "DeepSeek API Key", type="password",
+        value=st.session_state.api_key,
+        placeholder="sk-…",
+        label_visibility="collapsed",
+    )
     if ak:
         st.session_state.api_key = ak
 
     st.markdown("---")
-    st.markdown('<span class="section-label">Disease / Context</span>', unsafe_allow_html=True)
-    ctx = st.text_input("Biological context",
-                         value=st.session_state.context,
-                         placeholder="e.g., Acute Myeloid Leukemia (AML)",
-                         label_visibility="collapsed",
-                         help="Injected into every system prompt. Change to redirect the analysis focus.")
+
+    # ── NCBI credentials ──
+    st.markdown('<span class="section-label">NCBI / PubMed Credentials</span>', unsafe_allow_html=True)
+    st.markdown(
+        '<p class="key-hint">Optional but strongly recommended.<br>'
+        'Prevents rate-limiting when querying PubMed.<br>'
+        'Get a free key at '
+        '<a href="https://www.ncbi.nlm.nih.gov/account/" target="_blank" '
+        'style="color:var(--accent2)">ncbi.nlm.nih.gov/account</a></p>',
+        unsafe_allow_html=True,
+    )
+    ncbi_email = st.text_input(
+        "NCBI Email", type="default",
+        value=st.session_state.ncbi_email,
+        placeholder="your@email.com",
+        label_visibility="visible",
+    )
+    if ncbi_email:
+        st.session_state.ncbi_email = ncbi_email
+
+    ncbi_key = st.text_input(
+        "NCBI API Key", type="password",
+        value=st.session_state.ncbi_key,
+        placeholder="e.g. 73b1952d…",
+        label_visibility="visible",
+    )
+    if ncbi_key:
+        st.session_state.ncbi_key = ncbi_key
+
+    st.markdown("---")
+
+    # ── Context ──
+    st.markdown('<span class="section-label">Disease / Biological Context</span>', unsafe_allow_html=True)
+    st.markdown(
+        '<p class="key-hint">Comma-separated for multiple contexts.<br>'
+        'e.g. <em>Breast Cancer, TP53 mutation</em></p>',
+        unsafe_allow_html=True,
+    )
+    ctx = st.text_input(
+        "Biological context",
+        value=st.session_state.context,
+        placeholder="e.g. Acute Myeloid Leukemia (AML), TP53",
+        label_visibility="collapsed",
+        help="Injected into every system prompt and PubMed query. Comma-separate for multiple terms.",
+    )
     if ctx:
         st.session_state.context = ctx
 
     st.markdown("---")
-    st.markdown("---")
 
+    # ── Session summary + export ──
     if st.session_state.results:
         total  = len(st.session_state.results)
         hi     = sum(1 for r in st.session_state.results if r.get("final_conf", 0) >= 0.7)
@@ -1412,29 +1173,28 @@ with st.sidebar:
         </div>
         """, unsafe_allow_html=True)
 
-        # CSV export
         rows = []
         for r in st.session_state.results:
             rows.append({
-                "Community":                  r["community_id"],
-                "Genes":                      ", ".join(r.get("genes", [])),
-                "Enrichment_Pathways":        "; ".join(r.get("enrichment", [])),
-                "Process_With_Enrichment":    r.get("proc_with", ""),
-                "Confidence_With_Before":     r.get("conf_with", 0),
-                "Confidence_With_After":      r.get("conf_with_after", 0),
-                "Process_Without_Enrichment": r.get("proc_without", ""),
-                "Confidence_Without_Before":  r.get("conf_without", 0),
-                "Confidence_Without_After":   r.get("conf_without_after", 0),
-                "Final_Process":              r.get("final_process", ""),
-                "Final_Confidence":           r.get("final_conf", 0),
-                "Conflicting_Evidence":       r.get("conflict", False),
-                "Conflict_Description":       r.get("conflict_desc", ""),
-                "Papers_Total":               len(r.get("papers", [])),
-                "Papers_Top_Journal":         sum(1 for p in r.get("papers", []) if p.get("is_top_journal")),
-                "Supporting_Citations":       " | ".join(r.get("citations", [])),
-                "Analysis_With_Enrichment":   r.get("analysis_with", ""),
-                "Analysis_Without_Enrichment":r.get("analysis_without", ""),
-                "Validation_Text":            r.get("validation_text", ""),
+                "Community":                   r["community_id"],
+                "Genes":                       ", ".join(r.get("genes", [])),
+                "Enrichment_Pathways":         "; ".join(r.get("enrichment", [])),
+                "Process_With_Enrichment":     r.get("proc_with", ""),
+                "Confidence_With_Before":      r.get("conf_with", 0),
+                "Confidence_With_After":       r.get("conf_with_after", 0),
+                "Process_Without_Enrichment":  r.get("proc_without", ""),
+                "Confidence_Without_Before":   r.get("conf_without", 0),
+                "Confidence_Without_After":    r.get("conf_without_after", 0),
+                "Final_Process":               r.get("final_process", ""),
+                "Final_Confidence":            r.get("final_conf", 0),
+                "Conflicting_Evidence":        r.get("conflict", False),
+                "Conflict_Description":        r.get("conflict_desc", ""),
+                "Papers_Total":                len(r.get("papers", [])),
+                "Papers_Top_Journal":          sum(1 for p in r.get("papers", []) if p.get("is_top_journal")),
+                "Supporting_Citations":        " | ".join(r.get("citations", [])),
+                "Analysis_With_Enrichment":    r.get("analysis_with", ""),
+                "Analysis_Without_Enrichment": r.get("analysis_without", ""),
+                "Validation_Text":             r.get("validation_text", ""),
             })
         csv_data = pd.DataFrame(rows).to_csv(index=False)
         st.download_button(
@@ -1445,18 +1205,27 @@ with st.sidebar:
         )
 
 # ─── Header ──────────────────────────────────────────────────────────────────
+# Build display context — show comma-separated terms cleanly
+ctx_display = st.session_state.context
 st.markdown(f"""
 <div class="ladder-header">
   <p class="ladder-logo"><span>L</span>ADDER</p>
-  <p class="ladder-sub"><strong>L</strong>iterature-<strong>A</strong>ssisted <strong>D</strong>ual-annotation &amp; <strong>E</strong>vidence-based <strong>R</strong>easoning &ensp;·&ensp; Live PubMed Validation</p>
-  <span class="context-pill">Context: {st.session_state.context}</span>
+  <p class="ladder-sub">
+    <strong>L</strong>iterature-<strong>A</strong>ssisted
+    <strong>D</strong>ual-annotation &amp;
+    <strong>E</strong>vidence-based <strong>R</strong>easoning
+    &ensp;·&ensp; Live PubMed Validation
+  </p>
+  <span class="context-pill">Context: {_html.escape(ctx_display)}</span>
 </div>
 """, unsafe_allow_html=True)
 
 # ─── Step Trail ───────────────────────────────────────────────────────────────
-STEPS = [("📝", "Input"), ("🔬", "Enrichment"), ("🤖", "Annotation"),
-          ("📚", "PubMed"), ("✅", "Validation"), ("🗂️", "Results")]
-step  = st.session_state.step
+STEPS = [
+    ("📝", "Input"), ("🔬", "Enrichment"), ("🤖", "Annotation"),
+    ("📚", "PubMed"), ("✅", "Validation"), ("🗂️", "Results"),
+]
+step = st.session_state.step
 
 trail_html = '<div class="step-trail">'
 for i, (icon, label) in enumerate(STEPS):
@@ -1499,18 +1268,32 @@ if not st.session_state.results:
         parsed = parse_communities(community_text)
 
     c1, c2, _ = st.columns([1.2, 1.5, 3])
-    run_btn = c1.button("  Run Analysis", type="primary",
-                         disabled=not (community_text and st.session_state.api_key),
-                         use_container_width=True)
+    run_btn = c1.button(
+        "  Run Analysis", type="primary",
+        disabled=not (community_text and st.session_state.api_key),
+        use_container_width=True,
+    )
     if parsed:
         c2.info(f"**{len(parsed)}** gene set(s) · **{sum(len(v) for v in parsed.values())}** genes total")
 
     if not st.session_state.api_key:
         st.warning("Enter your DeepSeek API key in the sidebar to proceed.")
 
+    if not st.session_state.ncbi_email or not st.session_state.ncbi_key:
+        st.info(
+            "ℹ️ NCBI email and API key are not set. PubMed queries will still work but may be "
+            "rate-limited. Add your credentials in the sidebar for best results."
+        )
+
     if run_btn and parsed:
         st.session_state.step = 1
-        results = run_pipeline(parsed, st.session_state.api_key, st.session_state.context)
+        results = run_pipeline(
+            parsed,
+            st.session_state.api_key,
+            st.session_state.context,
+            st.session_state.ncbi_email,
+            st.session_state.ncbi_key,
+        )
         st.session_state.results = results
         st.session_state.step    = 5
         st.rerun()
@@ -1524,9 +1307,8 @@ if st.session_state.results:
         unsafe_allow_html=True,
     )
     if rc2.button("🔄 New run", use_container_width=True):
-        st.session_state.results      = []
-        st.session_state.chat_history = {}
-        st.session_state.step         = 0
+        st.session_state.results = []
+        st.session_state.step    = 0
         st.rerun()
 
     for result in st.session_state.results:
@@ -1538,8 +1320,10 @@ if st.session_state.results:
         papers       = result.get("papers", [])
         top_j_count  = sum(1 for p in papers if p.get("is_top_journal"))
 
-        exp_label = (f"Gene Set {comm_id}  ·  {final_proc[:55]}"
-                     f"{'…' if len(final_proc) > 55 else ''}  ·  {final_conf:.2f}")
+        exp_label = (
+            f"Gene Set {comm_id}  ·  {final_proc[:55]}"
+            f"{'…' if len(final_proc) > 55 else ''}  ·  {final_conf:.2f}"
+        )
         with st.expander(exp_label, expanded=(len(st.session_state.results) == 1)):
 
             # Badge row
@@ -1585,8 +1369,9 @@ if st.session_state.results:
                     '<div style="font-size:0.72rem;font-weight:600;color:var(--muted);'
                     'text-transform:uppercase;letter-spacing:.09em;margin-bottom:6px">'
                     '✨ Final · Validated</div>', unsafe_allow_html=True)
-                st.markdown(f'<div class="final-process" style="color:{conf_color}">{final_proc}</div>',
-                            unsafe_allow_html=True)
+                st.markdown(
+                    f'<div class="final-process" style="color:{conf_color}">{final_proc}</div>',
+                    unsafe_allow_html=True)
                 st.markdown(conf_bar_html(final_conf, "Validated confidence", ""),
                             unsafe_allow_html=True)
 
@@ -1646,18 +1431,31 @@ if st.session_state.results:
                         genes_str = " ".join(
                             f'<span class="gene-chip">{g}</span>'
                             for g in p["genes_mentioned"]
-                        ) if p["genes_mentioned"] else "<span style='color:var(--faint);font-size:0.72rem'>no query genes in abstract</span>"
+                        ) if p["genes_mentioned"] else (
+                            "<span style='color:var(--faint);font-size:0.72rem'>"
+                            "no query genes in abstract</span>"
+                        )
+                        abs_escaped = _html.escape(p["abstract"])
                         st.markdown(f"""
 <div class="{card_cls}">
-  <div class="paper-title">{i}. {star}{p['title']}</div>
-  <div class="paper-meta">{p['journal']} · {p['year']} · {p['authors']}{pmid_link}</div>
+  <div class="paper-title">{i}. {star}{_html.escape(p['title'])}</div>
+  <div class="paper-meta">{_html.escape(p['journal'])} · {p['year']} · {_html.escape(p['authors'])}{pmid_link}</div>
   <div style="margin:5px 0">{genes_str}</div>
-  <details><summary style="font-family:JetBrains Mono,monospace;font-size:0.72rem;color:var(--muted);cursor:pointer">Abstract ▾</summary>
-  <div class="paper-abstract" style="margin-top:8px">{p['abstract']}</div></details>
+  <details>
+    <summary style="font-family:JetBrains Mono,monospace;font-size:0.72rem;color:var(--muted);cursor:pointer">
+      Abstract ▾
+    </summary>
+    <div class="paper-abstract" style="margin-top:8px">{abs_escaped}</div>
+  </details>
 </div>""", unsafe_allow_html=True)
                     st.markdown("</div>", unsafe_allow_html=True)
                 else:
                     st.info("No PubMed papers found for this gene set.")
+                    st.markdown(
+                        "**Tip:** Check that your context terms match the language used in abstracts. "
+                        "Try shorter or broader terms (e.g. `AML` instead of `Acute Myeloid Leukemia (AML)`). "
+                        "Adding your NCBI API key in the sidebar also prevents silent rate-limiting."
+                    )
 
             with t4:
                 if has_conflict:
@@ -1677,9 +1475,8 @@ if st.session_state.results:
             with t5:
                 ann_text     = result.get("full_text", "— no annotation output stored —")
                 val_raw_text = result.get("val_raw", "") or "— no validation output (no papers fetched) —"
-                import html as _html
-                ann_escaped = _html.escape(ann_text)
-                val_escaped = _html.escape(val_raw_text)
+                ann_escaped  = _html.escape(ann_text)
+                val_escaped  = _html.escape(val_raw_text)
                 st.markdown(
                     f'<div class="raw-output-label">① Annotation output</div>'
                     f'<div class="raw-output-block"><pre>{ann_escaped}</pre></div>'
@@ -1687,60 +1484,3 @@ if st.session_state.results:
                     f'<div class="raw-output-block"><pre>{val_escaped}</pre></div>',
                     unsafe_allow_html=True,
                 )
-
-    # ─── Chat Section ─────────────────────────────────────────────────────────
-    st.markdown("---")
-    st.markdown(
-        '<h3 style="font-family:\'EB Garamond\',serif;font-size:1.45rem;font-weight:600;'
-        'color:var(--ink);margin:0 0 0.3rem">Ask About a Gene Set</h3>',
-        unsafe_allow_html=True,
-    )
-    st.markdown("""
-    <div class="grounding-note">
-      🔒 Responses are strictly grounded in the community's analysis and fetched papers.
-      External knowledge is disabled — if the evidence isn't there, the model says so.
-    </div>
-    """, unsafe_allow_html=True)
-
-    comm_options = {r["community_id"]: r for r in st.session_state.results}
-    selected_id  = st.selectbox(
-        "Select community",
-        options=list(comm_options.keys()),
-        format_func=lambda x: f"Gene Set {x}  ·  {comm_options[x].get('final_process', '')[:60]}",
-        label_visibility="collapsed",
-    )
-    sel = comm_options[selected_id]
-
-    # Chat history display
-    history = st.session_state.chat_history.get(selected_id, [])
-    if history:
-        chat_html = ""
-        for msg in history:
-            if msg["role"] == "user":
-                chat_html += (
-                    f'<div class="chat-role" style="text-align:right;color:var(--accent)">you</div>'
-                    f'<div class="chat-bubble-user">{msg["content"]}</div>'
-                )
-            else:
-                chat_html += (
-                    f'<div class="chat-role" style="color:var(--accent2)">ladder</div>'
-                    f'<div class="chat-bubble-bot">{msg["content"]}</div>'
-                )
-        st.markdown(f'<div class="chat-wrap">{chat_html}</div>', unsafe_allow_html=True)
-
-    if history:
-        if st.button("🗑️ Clear chat", key=f"clear_{selected_id}"):
-            st.session_state.chat_history[selected_id] = []
-            st.rerun()
-
-    q = st.chat_input(
-        placeholder=f"Why is {sel.get('genes', ['?'])[0]} contributing to this pathway?",
-        key=f"chat_{selected_id}",
-    )
-    if q:
-        with st.spinner("Generating grounded response…"):
-            answer = chat_grounded(q, sel, history, st.session_state.api_key)
-        st.session_state.chat_history.setdefault(selected_id, [])
-        st.session_state.chat_history[selected_id].append({"role": "user",      "content": q})
-        st.session_state.chat_history[selected_id].append({"role": "assistant", "content": answer})
-        st.rerun()

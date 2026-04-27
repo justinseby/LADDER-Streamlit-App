@@ -475,10 +475,8 @@ HQ_ISSN_SET, HQ_EISSN_SET, TOP_JOURNALS_NORMALIZED, _TOP_JOURNALS_LIST = load_cl
 
 # ─── Helpers ──────────────────────────────────────────────────────────────────
 def conf_bar_html(score: float, label: str, delta_icon: str = "") -> str:
-    pct = int(score * 100)
-    if score >= 0.70:   color = "#4dac26"
-    elif score >= 0.40: color = "#f59e0b"
-    else:               color = "#ca0020"
+    pct   = int(score * 100)
+    color = "#2b8a3e"   # ← single color, always
     return f"""
     <div class="conf-bar-wrap">
         <div class="conf-label">

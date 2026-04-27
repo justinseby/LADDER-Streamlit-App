@@ -1114,13 +1114,11 @@ with st.sidebar:
     # ── NCBI credentials ──────────────────────────────────────────────────────
     st.markdown('<span class="section-label">NCBI / PubMed Credentials</span>', unsafe_allow_html=True)
     st.markdown(
-        '<p class="key-hint">Optional but strongly recommended.<br>'
-        'Prevents rate-limiting when querying PubMed.<br>'
-        'Get a free key at '
-        '<a href="https://www.ncbi.nlm.nih.gov/account/" target="_blank" '
-        'style="color:var(--accent2)">ncbi.nlm.nih.gov/account</a></p>',
-        unsafe_allow_html=True,
-    )
+    '<p>Get a free key at '
+    '<a href="https://www.ncbi.nlm.nih.gov/account/" target="_blank" '
+    'style="color:var(--accent2)">ncbi.nlm.nih.gov/account</a></p>',
+    unsafe_allow_html=True,
+)
     ncbi_email = st.text_input(
         "NCBI Email", value=st.session_state.ncbi_email,
         placeholder="your@email.com", label_visibility="visible",
@@ -1141,14 +1139,13 @@ with st.sidebar:
     # ── PubMed search terms ───────────────────────────────────────────────────
     st.markdown('<span class="section-label">PubMed Search Terms</span>', unsafe_allow_html=True)
     st.markdown(
-        '<p class="key-hint">Comma-separated terms used to query PubMed.<br>'
-        'e.g. <em>Acute Myeloid Leukemia, AML, leukemia</em><br>'
-        'Tip: include abbreviations for broader coverage.</p>',
-        unsafe_allow_html=True,
-    )
+    '<p class="key-hint">Comma-separated terms used to query PubMed.<br>'
+    'e.g. <em>Acute Myeloid Leukemia, AML, leukemia</em></p>',
+    unsafe_allow_html=True,
+)
     pubmed_terms = st.text_input(
         "PubMed search terms", value=st.session_state.pubmed_terms,
-        placeholder="e.g. Acute Myeloid Leukemia, AML, leukemia",
+        placeholder="Acute Myeloid Leukemia,leukemia",
         label_visibility="collapsed",
     )
     if pubmed_terms:
@@ -1160,7 +1157,7 @@ with st.sidebar:
     st.markdown('<span class="section-label">LLM System Prompt</span>', unsafe_allow_html=True)
     st.markdown(
         '<p class="key-hint">Full system prompt sent to DeepSeek before every call.<br>'
-        'Set your disease focus, expert role, and any instructions here.</p>',
+        'Set your disease focus, expert role, context , and any instructions here.</p>',
         unsafe_allow_html=True,
     )
     system_prompt_input = st.text_area(
@@ -1179,11 +1176,10 @@ with st.sidebar:
     n_eissn = len(HQ_EISSN_SET)
     n_names = len(TOP_JOURNALS_NORMALIZED)
     if n_issn > 0 or n_eissn > 0:
-        st.markdown(
-            f'<p class="key-hint">📋 Clarivate JIF list loaded<br>'
-            f'{n_issn} ISSNs · {n_eissn} eISSNs · {n_names} names</p>',
-            unsafe_allow_html=True,
-        )
+    st.markdown(
+        '<p class="key-hint">📋 Clarivate JIF list loaded</p>',
+        unsafe_allow_html=True,
+    )
     else:
         st.markdown(
             '<p class="key-hint" style="color:var(--amber)">⚠️ Clarivate CSV not found<br>'

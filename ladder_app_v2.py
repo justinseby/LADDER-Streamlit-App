@@ -1176,7 +1176,7 @@ with st.sidebar:
     n_eissn = len(HQ_EISSN_SET)
     n_names = len(TOP_JOURNALS_NORMALIZED)
     if n_issn > 0 or n_eissn > 0:
-    st.markdown(
+        st.markdown(
         '<p class="key-hint">📋 Clarivate JIF list loaded</p>',
         unsafe_allow_html=True,
     )

@@ -345,38 +345,24 @@ hr { border: none !important; border-top: 1px solid var(--rule) !important; marg
     text-transform: uppercase; letter-spacing: 0.1em; margin-top: 3px;
 }
 
-/* ── RAW OUTPUT — light theme, no dark background ── */
+/* ── RAW OUTPUT ── */
 .raw-output-block {
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    padding: 1rem 1.2rem;
-    overflow-x: auto;
-    overflow-y: auto;
-    max-height: 600px;
-    margin-bottom: 1rem;
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 6px; padding: 1rem 1.2rem;
+    overflow-x: auto; overflow-y: auto; max-height: 600px; margin-bottom: 1rem;
 }
 .raw-output-block pre {
-    margin: 0;
-    white-space: pre-wrap;
-    word-break: break-word;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 0.75rem;
-    line-height: 1.75;
-    color: var(--sub) !important;
-    background: transparent;
-    border: none !important;
+    margin: 0; white-space: pre-wrap; word-break: break-word;
+    font-family: 'JetBrains Mono', monospace; font-size: 0.75rem;
+    line-height: 1.75; color: var(--sub) !important;
+    background: transparent; border: none !important;
 }
 .raw-output-label {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 0.66rem; font-weight: 600;
-    color: var(--faint) !important;
-    text-transform: uppercase; letter-spacing: 0.12em;
+    font-family: 'JetBrains Mono', monospace; font-size: 0.66rem; font-weight: 600;
+    color: var(--faint) !important; text-transform: uppercase; letter-spacing: 0.12em;
     margin: 0 0 6px; display: flex; align-items: center; gap: 8px;
 }
-.raw-output-label::after {
-    content: ''; flex: 1; height: 1px; background: var(--border);
-}
+.raw-output-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
 
 /* ── NCBI key input hint ── */
 .key-hint {
@@ -384,88 +370,115 @@ hr { border: none !important; border-top: 1px solid var(--rule) !important; marg
     font-size: 0.68rem; color: var(--faint) !important;
     margin-top: 3px; line-height: 1.5;
 }
+
+/* ── PROGRESS PANEL ── */
+.progress-step {
+    font-family: 'JetBrains Mono', monospace; font-size: 0.75rem;
+    color: var(--muted) !important; padding: 3px 0;
+    display: flex; align-items: center; gap: 8px;
+}
+.progress-step.active { color: var(--accent) !important; font-weight: 600; }
+.progress-step.done   { color: var(--green) !important; }
 </style>
 """, unsafe_allow_html=True)
 
 # ─── Constants ────────────────────────────────────────────────────────────────
-DEEPSEEK_URL = "https://api.deepseek.com/v1/chat/completions"
-NCBI_BASE    = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils"
-JOURNAL_FILE = "complete_high_tqcc_journals.txt"
+DEEPSEEK_URL   = "https://api.deepseek.com/v1/chat/completions"
+NCBI_BASE      = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils"
+CLARIVATE_FILE = "journals_filtered_JIF_ge_4.csv"
 
 # ─── Session State ────────────────────────────────────────────────────────────
 _DEFAULTS = {
-    "api_key":    "",
-    "ncbi_email": "",
-    "ncbi_key":   "",
-    "context":    "Acute Myeloid Leukemia (AML)",
-    "results":    [],
-    "step":       0,
-    "running":    False,
+    "api_key":       "",
+    "ncbi_email":    "",
+    "ncbi_key":      "",
+    # context removed — system_prompt carries disease focus
+    "pubmed_terms":  "Acute Myeloid Leukemia, AML, leukemia",
+    "system_prompt": (
+        "You are a bioinformatics expert. Focus on Acute Myeloid Leukemia (AML). "
+        "Provide detailed pathway analysis with scientific literature support. "
+        "Always cite specific papers when discussing pathway relationships."
+    ),
+    "results":       [],
+    "step":          0,
+    "running":       False,
 }
 for k, v in _DEFAULTS.items():
     if k not in st.session_state:
         st.session_state[k] = v
 
-# ─── Load Top Journals ────────────────────────────────────────────────────────
+
+# ─── Journal Loading — Clarivate CSV ─────────────────────────────────────────
 @st.cache_resource
-def load_top_journals() -> Dict[str, int]:
+def load_clarivate_journals():
     try:
-        with open(JOURNAL_FILE, "r", encoding="utf-8") as f:
-            lines = f.readlines()
-        journals: Dict[str, int] = {}
-        for line in lines:
-            line = line.strip()
-            if not line or "Complete List" in line or "===" in line or "Total journals" in line:
-                continue
-            if "|" in line:
-                parts = line.split("|")
-                if len(parts) >= 3:
-                    rank_str = parts[0].strip().lstrip("#")
-                    name     = parts[1].strip()
-                    if name and rank_str.isdigit():
-                        norm = normalize_journal(name)
-                        if norm:
-                            journals[norm] = int(rank_str)
-        return journals
+        jif_df = pd.read_csv(CLARIVATE_FILE, sep=",")
+        jif_df.columns = [c.strip() for c in jif_df.columns]
+
+        hq_issn_set   = set()
+        hq_eissn_set  = set()
+        journal_names = []
+
+        for _, jr in jif_df.iterrows():
+            issn  = str(jr.get("ISSN",  "")).strip().replace("-", "").upper()
+            eissn = str(jr.get("eISSN", "")).strip().replace("-", "").upper()
+            name  = str(jr.get("Journal name", "")).strip()
+
+            if issn  and issn  != "NAN": hq_issn_set.add(issn)
+            if eissn and eissn != "NAN": hq_eissn_set.add(eissn)
+            if name:                     journal_names.append(name)
+
+        normalized_set = {_normalize_journal(j) for j in journal_names}
+        return hq_issn_set, hq_eissn_set, normalized_set, journal_names
+
     except FileNotFoundError:
+        st.warning(f"⚠️ {CLARIVATE_FILE} not found — journal quality filter disabled.")
         defaults = [
             "nature", "science", "cell", "nature medicine", "nature genetics",
             "blood", "leukemia", "cancer cell", "nature cancer", "cancer research",
             "journal of clinical oncology", "haematologica",
         ]
-        return {normalize_journal(j): i + 1 for i, j in enumerate(defaults)}
+        normalized_set = {_normalize_journal(j) for j in defaults}
+        return set(), set(), normalized_set, defaults
 
 
-def normalize_journal(name: str) -> str:
+def _normalize_journal(name: str) -> str:
     if not name:
         return ""
     name = str(name).lower()
+    name = name.split(" : ")[0].split(" - ")[0]  # strip subtitles
     name = re.sub(r"[^\w\s]", "", name)
     name = re.sub(r"\s+", " ", name)
     return name.strip()
 
 
-TOP_JOURNALS: Dict[str, int]   = load_top_journals()
-TOP_JOURNALS_NORMALIZED: set   = set(TOP_JOURNALS.keys())
+def _normalize_issn(val) -> str:
+    if not val or (isinstance(val, float) and pd.isna(val)):
+        return ""
+    return str(val).strip().replace("-", "").upper()
 
 
-def get_journal_rank(journal_name: str) -> int:
-    norm  = normalize_journal(journal_name)
-    match = fuzz_process.extractOne(norm, TOP_JOURNALS_NORMALIZED, score_cutoff=85)
-    if match:
-        return TOP_JOURNALS.get(match[0], 99999)
-    return 99999
+def _is_high_quality_paper(paper: Dict, hq_issn_set: set, hq_eissn_set: set,
+                            top_journals_normalized: set) -> bool:
+    if _normalize_issn(paper.get("issn")) in hq_issn_set - {""}:
+        return True
+    if _normalize_issn(paper.get("eissn")) in hq_eissn_set - {""}:
+        return True
+    norm = _normalize_journal(paper.get("journal", ""))
+    if norm and norm in top_journals_normalized:  # exact match only
+        return True
+    return False
+
+
+HQ_ISSN_SET, HQ_EISSN_SET, TOP_JOURNALS_NORMALIZED, _TOP_JOURNALS_LIST = load_clarivate_journals()
 
 
 # ─── Helpers ──────────────────────────────────────────────────────────────────
 def conf_bar_html(score: float, label: str, delta_icon: str = "") -> str:
     pct = int(score * 100)
-    if score >= 0.70:
-        color = "#4dac26"
-    elif score >= 0.40:
-        color = "#f59e0b"
-    else:
-        color = "#ca0020"
+    if score >= 0.70:   color = "#4dac26"
+    elif score >= 0.40: color = "#f59e0b"
+    else:               color = "#ca0020"
     return f"""
     <div class="conf-bar-wrap">
         <div class="conf-label">
@@ -568,13 +581,7 @@ def perform_enrichment(genes: List[str]) -> List[str]:
         return []
 
 
-# ─── DeepSeek calls ───────────────────────────────────────────────────────────
-def _ds_system(context: str) -> str:
-    return (f"You are a bioinformatics expert. Focus on {context}. "
-            "Provide detailed pathway analysis with scientific literature support. "
-            "Always cite specific papers when discussing pathway relationships.")
-
-
+# ─── DeepSeek call ────────────────────────────────────────────────────────────
 def _ds_call(api_key: str, system: str, prompt: str, max_tokens: int = 4000) -> str:
     hdrs = {"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"}
     body = {
@@ -593,7 +600,11 @@ def _ds_call(api_key: str, system: str, prompt: str, max_tokens: int = 4000) -> 
 
 
 # ─── Annotation Prompt ────────────────────────────────────────────────────────
-def create_all_in_one_prompt(genes: List[str], enrichment_pathways: List[str]) -> str:
+# context parameter removed — system prompt already carries disease focus
+def create_all_in_one_prompt(
+    genes: List[str],
+    enrichment_pathways: List[str],
+) -> str:
     enrichment_section = ""
     if enrichment_pathways:
         enrichment_section = "\nEnrichment Analysis Results:\n" + "\n".join(f"- {p}" for p in enrichment_pathways)
@@ -722,6 +733,10 @@ CRITICAL REQUIREMENTS:
 3. Provide updated confidence scores based on evidence strength
 4. Select the better-supported process as the final choice
 5. **MANDATORY: When referencing papers by number in any analysis text, you MUST include the COMPLETE paper details (FULL TITLE, ALL AUTHORS) immediately after the paper number.**
+6. The final selected process MUST be either:
+   (a) exactly one of the two original process names, OR
+   (b) "Neither process" ONLY if both updated confidence scores are ≤ 0.05.
+7. Final Confidence = updated confidence of the selected process (or max of both if "Neither process").
 
 FORMAT YOUR RESPONSE EXACTLY AS FOLLOWS:
 
@@ -827,29 +842,14 @@ def _parse_validation(response: str) -> Dict[str, Any]:
 
 
 # ─── PubMed Fetching ──────────────────────────────────────────────────────────
-def build_pubmed_query(genes: List[str], context: str) -> str:
-    """
-    Build a valid PubMed query for any user-supplied context.
-
-    - Gene terms: each gene quoted and field-tagged individually, joined with OR.
-    - Context: comma-separated phrases are split, each quoted and field-tagged,
-      joined with OR and wrapped in AND.
-    - All multi-word phrases are properly quoted so PubMed applies the field
-      tag to the entire phrase, not just the last word.
-    """
-    # Gene terms — all genes included, query sent via POST to avoid URL length limits
-    gene_terms = " OR ".join(
-        f'"{g}"[Title/Abstract]' for g in genes
-    )
-
-    # Context terms — split on comma, strip parens/extra whitespace, quote each phrase
+def build_pubmed_query(genes: List[str], pubmed_terms: str) -> str:
+    gene_terms = " OR ".join(f'"{g}"[Title/Abstract]' for g in genes)
     ctx_parts = [
         re.sub(r"[()]+", "", c).strip()
-        for c in context.split(",")
+        for c in pubmed_terms.split(",")
         if re.sub(r"[()]+", "", c).strip()
     ]
     ctx_terms = " OR ".join(f'"{c}"[Title/Abstract]' for c in ctx_parts)
-
     today = date.today().strftime("%Y/%m/%d")
     return (
         f'({gene_terms}) AND ({ctx_terms})'
@@ -859,27 +859,14 @@ def build_pubmed_query(genes: List[str], context: str) -> str:
 
 def fetch_pubmed_papers(
     genes: List[str],
-    context: str,
+    pubmed_terms: str,
     ncbi_email: str,
     ncbi_key: str,
     max_papers: int = 50,
 ) -> List[Dict]:
-    """
-    Fetch up to max_papers unique papers from PubMed.
 
-    Selection logic:
-      1. Build a properly quoted phrase query from gene names + all context terms.
-      2. esearch returns up to 300 PMIDs ranked by PubMed relevance.
-      3. efetch retrieves full XML for those PMIDs.
-      4. Parse every article — no gene-mention filter. Only skip if no abstract.
-      5. Deduplicate by PMID.
-      6. Sort by TQCC journal rank (asc), then by how many query genes appear
-         in the abstract (desc) as a secondary tiebreaker.
-      7. Return the top max_papers.
-    """
-    query = build_pubmed_query(genes, context)
+    query = build_pubmed_query(genes, pubmed_terms)
 
-    # Base params — add credentials only when provided
     def _params(extra: dict) -> dict:
         p = {**extra}
         if ncbi_email:
@@ -889,17 +876,13 @@ def fetch_pubmed_papers(
             p["api_key"] = ncbi_key
         return p
 
-    # 1. esearch — POST avoids URL length limits for large gene queries (140+ genes)
     try:
         time.sleep(0.34)
         r = requests.post(
             f"{NCBI_BASE}/esearch.fcgi",
             data=_params({
-                "db":      "pubmed",
-                "term":    query,
-                "retmax":  300,
-                "retmode": "json",
-                "sort":    "relevance",
+                "db": "pubmed", "term": query,
+                "retmax": 300, "retmode": "json", "sort": "relevance",
             }),
             timeout=30,
         )
@@ -910,16 +893,13 @@ def fetch_pubmed_papers(
     if not pmids:
         return []
 
-    # 2. efetch XML
     try:
         time.sleep(0.34)
         r2 = requests.get(
             f"{NCBI_BASE}/efetch.fcgi",
             params=_params({
-                "db":      "pubmed",
-                "id":      ",".join(pmids[:300]),
-                "rettype": "abstract",
-                "retmode": "xml",
+                "db": "pubmed", "id": ",".join(pmids[:300]),
+                "rettype": "abstract", "retmode": "xml",
             }),
             timeout=60,
         )
@@ -927,8 +907,8 @@ def fetch_pubmed_papers(
     except Exception:
         return []
 
-    seen_pmids: set     = set()
-    papers: List[Dict]  = []
+    seen_pmids: set    = set()
+    papers: List[Dict] = []
 
     for art in root.findall(".//PubmedArticle"):
         try:
@@ -961,31 +941,40 @@ def fetch_pubmed_papers(
                     names.append(f"{ln} {fn}".strip())
             authors = ", ".join(names) + (" et al." if len(auth_els) > 6 else "")
 
+            issn, eissn = "", ""
+            for issn_elem in art.findall(".//Journal/ISSN"):
+                issn_type = issn_elem.get("IssnType", "")
+                if issn_type == "Print":
+                    issn  = issn_elem.text or ""
+                elif issn_type == "Electronic":
+                    eissn = issn_elem.text or ""
+
             mentioned = [
                 g for g in genes
                 if re.search(rf"\b{re.escape(g)}\b", abstract, re.IGNORECASE)
             ]
 
-            j_rank = get_journal_rank(journal)
-            is_top = j_rank < 99999
-
-            papers.append({
+            paper = {
                 "title":           title,
                 "authors":         authors,
                 "journal":         journal,
+                "issn":            issn,
+                "eissn":           eissn,
                 "year":            year,
                 "pmid":            pmid,
                 "abstract":        abstract[:700] + ("…" if len(abstract) > 700 else ""),
                 "genes_mentioned": mentioned,
                 "gene_count":      len(mentioned),
-                "journal_rank":    j_rank,
-                "is_top_journal":  is_top,
-            })
+            }
+            paper["is_top_journal"] = _is_high_quality_paper(
+                paper, HQ_ISSN_SET, HQ_EISSN_SET, TOP_JOURNALS_NORMALIZED
+            )
+            papers.append(paper)
+
         except Exception:
             continue
 
-    # Sort: best TQCC rank first; within same rank, more gene mentions first
-    papers.sort(key=lambda x: (x["journal_rank"], -x["gene_count"]))
+    papers.sort(key=lambda x: (0 if x["is_top_journal"] else 1, -x["gene_count"]))
     return papers[:max_papers]
 
 
@@ -993,29 +982,42 @@ def fetch_pubmed_papers(
 def run_pipeline(
     communities: Dict[str, List[str]],
     api_key: str,
-    context: str,
+    pubmed_terms: str,
     ncbi_email: str,
     ncbi_key: str,
+    system_prompt: str,
 ) -> List[Dict]:
     results = []
-    system  = _ds_system(context)
     total   = len(communities)
 
+    st.markdown("#### ⚙️ Pipeline Progress")
+    progress_bar   = st.progress(0, text="Starting…")
+    progress_label = st.empty()
+
     for idx, (comm_id, genes) in enumerate(communities.items(), 1):
+
+        pct = int((idx - 1) / total * 100)
+        progress_bar.progress(pct, text=f"Community {comm_id}  ({idx}/{total})")
+        progress_label.markdown(
+            f'<div class="progress-step active">▶ Processing Gene Set {comm_id} '
+            f'— {len(genes)} genes</div>',
+            unsafe_allow_html=True,
+        )
+
         with st.status(
-            f"Community {comm_id}  ·  {len(genes)} genes  ({idx}/{total})",
+            f"Gene Set {comm_id}  ·  {len(genes)} genes  ({idx}/{total})",
             expanded=True,
         ) as status:
             r: Dict[str, Any] = {"community_id": comm_id, "genes": genes}
 
             # 1 — Enrichment
-            status.update(label=f"Community {comm_id} · 🔬 Enrichment analysis…")
+            status.update(label=f"Gene Set {comm_id} · 🔬 Step 1/4 — Enrichment analysis…")
             r["enrichment"] = perform_enrichment(genes)
 
             # 2 — Annotation
-            status.update(label=f"Community {comm_id} · 🤖 LLM annotation…")
+            status.update(label=f"Gene Set {comm_id} · 🤖 Step 2/4 — LLM annotation…")
             prompt    = create_all_in_one_prompt(genes, r["enrichment"])
-            full_text = _ds_call(api_key, system, prompt, max_tokens=4000)
+            full_text = _ds_call(api_key, system_prompt, prompt, max_tokens=4000)
             r["full_text"] = full_text
 
             proc_with,    conf_with    = _extract_process_info(full_text, "WITH")
@@ -1034,13 +1036,13 @@ def run_pipeline(
             })
 
             # 3 — PubMed
-            status.update(label=f"Community {comm_id} · 📚 Fetching PubMed papers…")
-            papers      = fetch_pubmed_papers(genes, context, ncbi_email, ncbi_key, max_papers=50)
+            status.update(label=f"Gene Set {comm_id} · 📚 Step 3/4 — Fetching PubMed papers…")
+            papers      = fetch_pubmed_papers(genes, pubmed_terms, ncbi_email, ncbi_key, max_papers=50)
             r["papers"] = papers
             top_j       = sum(1 for p in papers if p["is_top_journal"])
 
             # 4 — Validation
-            status.update(label=f"Community {comm_id} · ✅ Validating against {len(papers)} papers…")
+            status.update(label=f"Gene Set {comm_id} · ✅ Step 4/4 — Validating against {len(papers)} papers ({top_j} HQ)…")
             if papers:
                 val_prompt = create_validation_prompt(
                     comm_id, genes,
@@ -1049,7 +1051,7 @@ def run_pipeline(
                     r["analysis_with"], r["analysis_without"],
                     papers,
                 )
-                val_raw = _ds_call(api_key, system, val_prompt, max_tokens=8000)
+                val_raw = _ds_call(api_key, system_prompt, val_prompt, max_tokens=8000)
                 parsed  = _parse_validation(val_raw)
                 r.update({
                     "val_raw":            val_raw,
@@ -1077,10 +1079,17 @@ def run_pipeline(
                 })
 
             status.update(
-                label=f"Community {comm_id} · ✔ Done — {len(papers)} papers, {top_j} top-journal",
+                label=f"Gene Set {comm_id} · ✔ Done — {len(papers)} papers, {top_j} HQ",
                 state="complete",
             )
+
         results.append(r)
+
+    progress_bar.progress(100, text=f"✅ All {total} gene sets processed")
+    progress_label.markdown(
+        f'<div class="progress-step done">✔ Pipeline complete — {total} gene sets annotated & validated</div>',
+        unsafe_allow_html=True,
+    )
 
     return results
 
@@ -1092,20 +1101,19 @@ def run_pipeline(
 # ─── Sidebar ──────────────────────────────────────────────────────────────────
 with st.sidebar:
 
-    # ── DeepSeek API key ──
+    # ── DeepSeek API key ──────────────────────────────────────────────────────
     st.markdown('<span class="section-label">DeepSeek API Key</span>', unsafe_allow_html=True)
     ak = st.text_input(
         "DeepSeek API Key", type="password",
         value=st.session_state.api_key,
-        placeholder="sk-…",
-        label_visibility="collapsed",
+        placeholder="sk-…", label_visibility="collapsed",
     )
     if ak:
         st.session_state.api_key = ak
 
     st.markdown("---")
 
-    # ── NCBI credentials ──
+    # ── NCBI credentials ──────────────────────────────────────────────────────
     st.markdown('<span class="section-label">NCBI / PubMed Credentials</span>', unsafe_allow_html=True)
     st.markdown(
         '<p class="key-hint">Optional but strongly recommended.<br>'
@@ -1116,10 +1124,8 @@ with st.sidebar:
         unsafe_allow_html=True,
     )
     ncbi_email = st.text_input(
-        "NCBI Email", type="default",
-        value=st.session_state.ncbi_email,
-        placeholder="your@email.com",
-        label_visibility="visible",
+        "NCBI Email", value=st.session_state.ncbi_email,
+        placeholder="your@email.com", label_visibility="visible",
     )
     if ncbi_email:
         st.session_state.ncbi_email = ncbi_email
@@ -1127,34 +1133,69 @@ with st.sidebar:
     ncbi_key = st.text_input(
         "NCBI API Key", type="password",
         value=st.session_state.ncbi_key,
-        placeholder="e.g. 73b1952d…",
-        label_visibility="visible",
+        placeholder="e.g. 73b1952d…", label_visibility="visible",
     )
     if ncbi_key:
         st.session_state.ncbi_key = ncbi_key
 
     st.markdown("---")
 
-    # ── Context ──
-    st.markdown('<span class="section-label">Disease / Biological Context</span>', unsafe_allow_html=True)
+    # ── PubMed search terms ───────────────────────────────────────────────────
+    st.markdown('<span class="section-label">PubMed Search Terms</span>', unsafe_allow_html=True)
     st.markdown(
-        '<p class="key-hint">Comma-separated for multiple contexts.<br>'
-        'e.g. <em>Breast Cancer, TP53 mutation</em></p>',
+        '<p class="key-hint">Comma-separated terms used to query PubMed.<br>'
+        'e.g. <em>Acute Myeloid Leukemia, AML, leukemia</em><br>'
+        'Tip: include abbreviations for broader coverage.</p>',
         unsafe_allow_html=True,
     )
-    ctx = st.text_input(
-        "Biological context",
-        value=st.session_state.context,
-        placeholder="e.g. Acute Myeloid Leukemia (AML), TP53",
+    pubmed_terms = st.text_input(
+        "PubMed search terms", value=st.session_state.pubmed_terms,
+        placeholder="e.g. Acute Myeloid Leukemia, AML, leukemia",
         label_visibility="collapsed",
-        help="Injected into every system prompt and PubMed query. Comma-separate for multiple terms.",
     )
-    if ctx:
-        st.session_state.context = ctx
+    if pubmed_terms:
+        st.session_state.pubmed_terms = pubmed_terms
 
     st.markdown("---")
 
-    # ── Session summary + export ──
+    # ── LLM System Prompt ─────────────────────────────────────────────────────
+    st.markdown('<span class="section-label">LLM System Prompt</span>', unsafe_allow_html=True)
+    st.markdown(
+        '<p class="key-hint">Full system prompt sent to DeepSeek before every call.<br>'
+        'Set your disease focus, expert role, and any instructions here.</p>',
+        unsafe_allow_html=True,
+    )
+    system_prompt_input = st.text_area(
+        "System prompt",
+        value=st.session_state.system_prompt,
+        height=130,
+        label_visibility="collapsed",
+    )
+    if system_prompt_input:
+        st.session_state.system_prompt = system_prompt_input
+
+    st.markdown("---")
+
+    # ── Journal quality info ──────────────────────────────────────────────────
+    n_issn  = len(HQ_ISSN_SET)
+    n_eissn = len(HQ_EISSN_SET)
+    n_names = len(TOP_JOURNALS_NORMALIZED)
+    if n_issn > 0 or n_eissn > 0:
+        st.markdown(
+            f'<p class="key-hint">📋 Clarivate JIF list loaded<br>'
+            f'{n_issn} ISSNs · {n_eissn} eISSNs · {n_names} names</p>',
+            unsafe_allow_html=True,
+        )
+    else:
+        st.markdown(
+            '<p class="key-hint" style="color:var(--amber)">⚠️ Clarivate CSV not found<br>'
+            'Place journals_filtered_JIF_ge_4.csv alongside the app.</p>',
+            unsafe_allow_html=True,
+        )
+
+    st.markdown("---")
+
+    # ── Session summary + export ──────────────────────────────────────────────
     if st.session_state.results:
         total  = len(st.session_state.results)
         hi     = sum(1 for r in st.session_state.results if r.get("final_conf", 0) >= 0.7)
@@ -1205,8 +1246,8 @@ with st.sidebar:
         )
 
 # ─── Header ──────────────────────────────────────────────────────────────────
-# Build display context — show comma-separated terms cleanly
-ctx_display = st.session_state.context
+# show first 80 chars of system prompt in the pill instead of a separate context field
+sys_display = st.session_state.system_prompt[:80] + ("…" if len(st.session_state.system_prompt) > 80 else "")
 st.markdown(f"""
 <div class="ladder-header">
   <p class="ladder-logo"><span>L</span>ADDER</p>
@@ -1216,7 +1257,7 @@ st.markdown(f"""
     <strong>E</strong>vidence-based <strong>R</strong>easoning
     &ensp;·&ensp; Live PubMed Validation
   </p>
-  <span class="context-pill">Context: {_html.escape(ctx_display)}</span>
+  <span class="context-pill">🧠 {_html.escape(sys_display)}</span>
 </div>
 """, unsafe_allow_html=True)
 
@@ -1226,7 +1267,6 @@ STEPS = [
     ("📚", "PubMed"), ("✅", "Validation"), ("🗂️", "Results"),
 ]
 step = st.session_state.step
-
 trail_html = '<div class="step-trail">'
 for i, (icon, label) in enumerate(STEPS):
     cls = "done" if step > i else ("active" if step == i else "")
@@ -1250,13 +1290,11 @@ if not st.session_state.results:
     )
 
     community_text = st.text_area(
-        "community_input",
-        height=220,
+        "community_input", height=220,
         placeholder=(
             "Gene Set 1: SLC19A2, SLC19A1, MIEN1, EFS, TRIM25, ASAH1, FUT8, TEAD4\n"
             "Gene Set 2: TP53, MDM2, CDKN1A, BAX, BCL2, CASP3\n"
-            "\n"
-            "# short forms also work:\n"
+            "\n# short forms also work:\n"
             "1: SLC19A2, SLC19A1, MIEN1\n"
             "2: TP53, MDM2, CDKN1A"
         ),
@@ -1278,7 +1316,6 @@ if not st.session_state.results:
 
     if not st.session_state.api_key:
         st.warning("Enter your DeepSeek API key in the sidebar to proceed.")
-
     if not st.session_state.ncbi_email or not st.session_state.ncbi_key:
         st.info(
             "ℹ️ NCBI email and API key are not set. PubMed queries will still work but may be "
@@ -1290,9 +1327,10 @@ if not st.session_state.results:
         results = run_pipeline(
             parsed,
             st.session_state.api_key,
-            st.session_state.context,
+            st.session_state.pubmed_terms,
             st.session_state.ncbi_email,
             st.session_state.ncbi_key,
+            st.session_state.system_prompt,
         )
         st.session_state.results = results
         st.session_state.step    = 5
@@ -1326,10 +1364,9 @@ if st.session_state.results:
         )
         with st.expander(exp_label, expanded=(len(st.session_state.results) == 1)):
 
-            # Badge row
             badge_html = (
                 f'<span class="badge badge-paper">📄 {len(papers)} papers</span> '
-                f'<span class="badge badge-star">⭐ {top_j_count} top-journal</span> '
+                f'<span class="badge badge-star">⭐ {top_j_count} HQ journals</span> '
             )
             badge_html += (
                 '<span class="badge badge-conflict">⚠️ Conflict</span>'
@@ -1339,7 +1376,6 @@ if st.session_state.results:
             st.markdown(badge_html, unsafe_allow_html=True)
             st.markdown("<br>", unsafe_allow_html=True)
 
-            # ── Confidence Grid ──────────────────────────────────────────────
             g1, g2, g3 = st.columns(3)
 
             with g1:
@@ -1377,13 +1413,9 @@ if st.session_state.results:
 
             st.markdown("<br>", unsafe_allow_html=True)
 
-            # ── Detail Tabs ──────────────────────────────────────────────────
             t1, t2, t3, t4, t5 = st.tabs([
-                "🧬 Genes & Enrichment",
-                "📝 Analysis",
-                "📚 Papers",
-                "⚠️ Conflicts & Citations",
-                "🔎 Raw LLM Output",
+                "🧬 Genes & Enrichment", "📝 Analysis",
+                "📚 Papers", "⚠️ Conflicts & Citations", "🔎 Raw LLM Output",
             ])
 
             with t1:
@@ -1414,15 +1446,14 @@ if st.session_state.results:
             with t3:
                 if papers:
                     st.markdown(
-                        f"**{len(papers)} papers fetched** — {top_j_count} from top-priority journals "
-                        f"· sorted by TQCC rank"
+                        f"**{len(papers)} papers fetched** — {top_j_count} from HQ journals "
+                        f"(Clarivate JIF ≥ 4) · sorted HQ-first then by gene count"
                     )
                     st.markdown('<div class="paper-scroll">', unsafe_allow_html=True)
                     for i, p in enumerate(papers, 1):
-                        rank_label = (f"#{p['journal_rank']}" if p["is_top_journal"] else "—")
-                        star       = f"★ [{rank_label}] " if p["is_top_journal"] else ""
-                        card_cls   = "paper-card top-journal" if p["is_top_journal"] else "paper-card"
-                        pmid_link  = (
+                        star     = "★ " if p["is_top_journal"] else ""
+                        card_cls = "paper-card top-journal" if p["is_top_journal"] else "paper-card"
+                        pmid_link = (
                             f' · <a href="https://pubmed.ncbi.nlm.nih.gov/{p["pmid"]}/" '
                             f'target="_blank" style="color:var(--accent2);font-size:0.68rem;'
                             f'font-family:monospace">PMID {p["pmid"]}</a>'
@@ -1452,9 +1483,9 @@ if st.session_state.results:
                 else:
                     st.info("No PubMed papers found for this gene set.")
                     st.markdown(
-                        "**Tip:** Check that your context terms match the language used in abstracts. "
-                        "Try shorter or broader terms (e.g. `AML` instead of `Acute Myeloid Leukemia (AML)`). "
-                        "Adding your NCBI API key in the sidebar also prevents silent rate-limiting."
+                        "**Tip:** Check that your PubMed search terms match the language used in "
+                        "abstracts. Try shorter or broader terms. Adding your NCBI API key in the "
+                        "sidebar also prevents silent rate-limiting."
                     )
 
             with t4:
@@ -1462,7 +1493,6 @@ if st.session_state.results:
                     st.error(f"**Conflict detected:** {result.get('conflict_desc', '')}")
                 else:
                     st.success("No conflicting evidence found across the fetched papers.")
-
                 citations = result.get("citations", [])
                 if citations:
                     st.markdown("**Supporting citations:**")

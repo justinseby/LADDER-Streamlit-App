@@ -798,8 +798,8 @@ def _extract_section(text: str, section_name: str) -> str:
 
 def _extract_process_info(text: str, prefix: str) -> Tuple[str, float]:
     patterns = [
-        rf"PROCESS {prefix} ENRICHMENT:\s*([^(]+?)\s*\(([0-9.]+)\)",
-        rf"PROCESS {prefix} ENRICHMENT:\s*([^(]*?)\s*\(\s*([0-9.]+)\s*\)",
+        rf"PROCESS {prefix} ENRICHMENT:\s*([^(\[]+?)\s*\(\[?([0-9.]+)\]?\)",   # handles ([0.85]) and (0.85)
+        rf"PROCESS {prefix} ENRICHMENT:\s*([^(]*?)\s*\(\s*\[?\s*([0-9.]+)\s*\]?\s*\)",
         rf"PROCESS {prefix} ENRICHMENT:\s*(.*?)\s*\(\s*Confidence Score:\s*([0-9.]+)\s*\)",
     ]
     for pat in patterns:
@@ -812,11 +812,15 @@ def _extract_process_info(text: str, prefix: str) -> Tuple[str, float]:
                     return name, conf
             except ValueError:
                 continue
+    # fallback: try to extract score from trailing ([N.NN]) in the line
     simple = rf"PROCESS {prefix} ENRICHMENT:\s*(.*?)(?=\n|$)"
     m = re.search(simple, text, re.IGNORECASE)
     if m:
-        name = _clean(re.sub(r"\s*\([^)]*$", "", m.group(1)).strip())
-        return name, 0.0
+        raw = m.group(1)
+        score_m = re.search(r"\(\[?([0-9.]+)\]?\)\s*$", raw)
+        conf = float(score_m.group(1)) if score_m else 0.0
+        name = _clean(re.sub(r"\s*\(\[?[0-9.]+\]?\)\s*$", "", raw).strip())
+        return name, conf
     return f"Unknown Process {prefix} Enrichment", 0.0
 
 

@@ -99,14 +99,6 @@ Set these in the sidebar at runtime (nothing is hardcoded):
 
 Currently deployed on **Streamlit Community Cloud**.
 
-## Tech stack
-
-- **Streamlit** — UI
-- **DeepSeek API** — LLM annotation & validation
-- **gseapy / Enrichr** — functional enrichment
-- **NCBI E-utilities** — live PubMed retrieval
-- **pandas / rapidfuzz** — data handling & journal name matching
-
 ## Citation
 
 If you use LADDER in your research, please cite:

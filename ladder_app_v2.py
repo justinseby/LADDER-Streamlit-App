@@ -720,21 +720,25 @@ VALIDATION TASK:
 Based STRICTLY on the provided literature above, evaluate both analyses and provide updated confidence scores.
 
 **ABSOLUTE REQUIREMENT FOR PAPER CITATIONS:**
-Throughout your entire response, whenever you reference any paper by number, you MUST immediately provide the complete paper information in this exact format:
-"Paper X: 'Full Paper Title', Complete Author List"
-NEVER use abbreviated citations like "Paper X: Author et al." or "Papers X-Y: Author1, Author2"
-ALWAYS include the full title in quotes and complete author names.
+Whenever you reference a paper anywhere in your response, always use this exact format:
+"Paper X (FirstAuthorLastName et al.)"
+For example: "Paper 3 (Nakamura et al.) shows..." or "supported by Paper 1 (Chen et al.) and Paper 4 (Okafor et al.)"
+Do NOT use bare numbers like "Paper 3" alone, and do NOT spell out full titles or complete author lists in-line — the first-author-et-al form is sufficient everywhere in the response.
+
 
 CRITICAL REQUIREMENTS:
 1. Use ONLY the provided papers - do not add external knowledge
 2. For each process, check if the genes are supported by the literature
 3. Provide updated confidence scores based on evidence strength
 4. Select the better-supported process as the final choice
-5. **MANDATORY: When referencing papers by number in any analysis text, you MUST include the COMPLETE paper details (FULL TITLE, ALL AUTHORS) immediately after the paper number.**
+5. **MANDATORY: When referencing papers by number anywhere in your analysis text, always use the "Paper X (FirstAuthor et al.)" format defined above — never bare numbers, never full citations.**
 6. The final selected process MUST be either:
    (a) exactly one of the two original process names, OR
-   (b) "Neither process" ONLY if both updated confidence scores are ≤ 0.05.
-7. Final Confidence = updated confidence of the selected process (or max of both if "Neither process").
+   (b) "Neither process" ONLY if both updated confidence scores (Updated Confidence With Enrichment, Updated Confidence Without Enrichment) are <= 0.05.
+
+7. The final confidence MUST follow:
+   - If a process is selected: Final Confidence = the updated confidence of that selected process.
+   - If "Neither process" is selected: Final Confidence = max(Updated Confidence With Enrichment, Updated Confidence Without Enrichment).
 
 FORMAT YOUR RESPONSE EXACTLY AS FOLLOWS:
 
@@ -765,8 +769,7 @@ SUPPORTING CITATIONS:
 
 VALIDATION ANALYSIS TEXT:
 [Comprehensive summary of all changes made, reasoning for confidence adjustments, and evidence from the provided studies that led to the final process selection.
-**MANDATORY CITATION FORMAT: When mentioning any paper numbers, you MUST include the COMPLETE citation with FULL TITLES AND AUTHORS - NOT JUST PARTIAL CITATIONS**]
-"""
+Use "Paper X (FirstAuthor et al.)" format for any paper references.]"""
 
 
 # ─── Response Parsers ─────────────────────────────────────────────────────────

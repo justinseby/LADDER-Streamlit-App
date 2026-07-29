@@ -13,7 +13,7 @@ LADDER is an LLM-powered gene set dual-annotation pipeline that names the biolog
 </p>
 
 <p align="center">
-  <img src="fig/LADDER Website Image.png" alt="LADDER Website screenshot" width="850">
+  <img src="Fig/LADDERWebsiteImage.png" alt="LADDER Website screenshot" width="550">
 </p>
 
 ---
@@ -73,7 +73,7 @@ pip install -r requirements.txt
 ### Run locally
 
 ```bash
-streamlit run app2.py
+streamlit run ladder_app_v2.py
 ```
 
 ## Configuration

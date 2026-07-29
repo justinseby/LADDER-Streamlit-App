@@ -90,7 +90,7 @@ Set these in the sidebar at runtime (nothing is hardcoded):
 ## Usage
 
 1. Open the app and enter your DeepSeek API key (and NCBI credentials, recommended) in the sidebar
-2. Paste your gene set(s), one per line, in any supported format
+2. Paste your gene set(s), one per line, or in any supported format
 3. Click **Run Analysis**
 4. Expand each gene set to inspect enrichment pathways, dual analysis, supporting papers, conflicts/citations, and raw LLM output
 5. Download the full results as CSV from the sidebar

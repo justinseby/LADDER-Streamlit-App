@@ -1,6 +1,7 @@
 # 🧬 LADDER · Gene Set Annotator
 
 **L**iterature-**A**ssisted **D**ual-annotation & **E**vidence-based **R**easoning
+
 LADDER is an LLM-powered gene set dual-annotation pipeline that names the biological process behind a gene set, validates that annotation against live PubMed literature, and reports a confidence score — with full transparency into supporting papers, journal quality, and any conflicting evidence found along the way.
 
 <p align="center">

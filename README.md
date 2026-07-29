@@ -37,7 +37,7 @@ Paste in one or more gene sets (e.g. output from a community-detection / co-expr
 - **Conflict detection** — the validation step explicitly checks for contradictory evidence across papers
 - **Full audit trail** — raw LLM outputs (annotation + validation) are preserved and viewable per gene set
 - **CSV export** — full session results (scores, papers, citations, analysis text) downloadable in one click
-- **Flexible input parsing** — accepts several gene-set text formats (`Gene Set 1: ...`, `Community 1: ...`, `1: ...`, etc.)
+- **Flexible input parsing** — accepts labelled (Gene Set 1:), comma-separated (GENE1, GENE2, ...), and one-gene-per-line input formats.
 
 ## How it works
 

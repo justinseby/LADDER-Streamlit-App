@@ -384,12 +384,33 @@ hr { border: none !important; border-top: 1px solid var(--rule) !important; marg
 
 # ─── Constants ────────────────────────────────────────────────────────────────
 DEEPSEEK_URL   = "https://api.deepseek.com/v1/chat/completions"
+OPENAI_URL     = "https://api.openai.com/v1/chat/completions"
+CLAUDE_URL     = "https://api.anthropic.com/v1/messages"
 NCBI_BASE      = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils"
 CLARIVATE_FILE = "journals_filtered_JIF_ge_4.csv"
 
+PROVIDER_LABELS = {
+    "deepseek": "DeepSeek",
+    "openai":   "GPT (OpenAI)",
+    "claude":   "Claude (Anthropic)",
+}
+PROVIDER_MODELS = {
+    "deepseek": "deepseek-chat",
+    "openai":   "gpt-4o",
+    "claude":   "claude-sonnet-4-6",
+}
+PROVIDER_KEY_PLACEHOLDER = {
+    "deepseek": "sk-…",
+    "openai":   "sk-…",
+    "claude":   "sk-ant-…",
+}
+
 # ─── Session State ────────────────────────────────────────────────────────────
 _DEFAULTS = {
-    "api_key":       "",
+    "llm_provider":     "deepseek",
+    "api_key_deepseek": "",
+    "api_key_openai":   "",
+    "api_key_claude":   "",
     "ncbi_email":    "",
     "ncbi_key":      "",
     # context removed — system_prompt carries disease focus
@@ -579,22 +600,49 @@ def perform_enrichment(genes: List[str]) -> List[str]:
         return []
 
 
-# ─── DeepSeek call ────────────────────────────────────────────────────────────
-def _ds_call(api_key: str, system: str, prompt: str, max_tokens: int = 4000) -> str:
-    hdrs = {"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"}
-    body = {
-        "model": "deepseek-chat",
-        "messages": [
-            {"role": "system", "content": system},
-            {"role": "user",   "content": prompt},
-        ],
-        "temperature": 0,
-        "max_tokens":  max_tokens,
-    }
-    r = requests.post(DEEPSEEK_URL, headers=hdrs, json=body, timeout=180)
-    if r.status_code == 200:
-        return r.json()["choices"][0]["message"]["content"]
-    raise Exception(f"DeepSeek {r.status_code}: {r.text[:300]}")
+# ─── LLM call (provider-agnostic) ────────────────────────────────────────────
+def _llm_call(provider: str, api_key: str, system: str, prompt: str,
+              max_tokens: int = 4000) -> str:
+    """Dispatch a chat completion to DeepSeek, OpenAI, or Claude,
+    always returning plain text content."""
+
+    if provider in ("deepseek", "openai"):
+        url   = DEEPSEEK_URL if provider == "deepseek" else OPENAI_URL
+        model = PROVIDER_MODELS[provider]
+        hdrs  = {"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"}
+        body  = {
+            "model": model,
+            "messages": [
+                {"role": "system", "content": system},
+                {"role": "user",   "content": prompt},
+            ],
+            "temperature": 0,
+            "max_tokens":  max_tokens,
+        }
+        r = requests.post(url, headers=hdrs, json=body, timeout=180)
+        if r.status_code == 200:
+            return r.json()["choices"][0]["message"]["content"]
+        raise Exception(f"{provider} {r.status_code}: {r.text[:300]}")
+
+    elif provider == "claude":
+        hdrs = {
+            "x-api-key": api_key,
+            "anthropic-version": "2023-06-01",
+            "Content-Type": "application/json",
+        }
+        body = {
+            "model": PROVIDER_MODELS["claude"],
+            "max_tokens": max_tokens,
+            "system": system,
+            "messages": [{"role": "user", "content": prompt}],
+        }
+        r = requests.post(CLAUDE_URL, headers=hdrs, json=body, timeout=180)
+        if r.status_code == 200:
+            content = r.json().get("content", [])
+            return "".join(b.get("text", "") for b in content if b.get("type") == "text")
+        raise Exception(f"claude {r.status_code}: {r.text[:300]}")
+
+    raise ValueError(f"Unknown provider: {provider}")
 
 
 # ─── Annotation Prompt ────────────────────────────────────────────────────────
@@ -982,6 +1030,7 @@ def fetch_pubmed_papers(
 # ─── Main Pipeline ────────────────────────────────────────────────────────────
 def run_pipeline(
     communities: Dict[str, List[str]],
+    provider: str,
     api_key: str,
     pubmed_terms: str,
     ncbi_email: str,
@@ -1018,7 +1067,7 @@ def run_pipeline(
             # 2 — Annotation
             status.update(label=f"Gene Set {comm_id} · 🤖 Step 2/4 — LLM annotation…")
             prompt    = create_all_in_one_prompt(genes, r["enrichment"])
-            full_text = _ds_call(api_key, system_prompt, prompt, max_tokens=4000)
+            full_text = _llm_call(provider, api_key, system_prompt, prompt, max_tokens=4000)
             r["full_text"] = full_text
 
             proc_with,    conf_with    = _extract_process_info(full_text, "WITH")
@@ -1052,7 +1101,7 @@ def run_pipeline(
                     r["analysis_with"], r["analysis_without"],
                     papers,
                 )
-                val_raw = _ds_call(api_key, system_prompt, val_prompt, max_tokens=8000)
+                val_raw = _llm_call(provider, api_key, system_prompt, val_prompt, max_tokens=8000)
                 parsed  = _parse_validation(val_raw)
                 r.update({
                     "val_raw":            val_raw,
@@ -1102,15 +1151,27 @@ def run_pipeline(
 # ─── Sidebar ──────────────────────────────────────────────────────────────────
 with st.sidebar:
 
-    # ── DeepSeek API key ──────────────────────────────────────────────────────
-    st.markdown('<span class="section-label">DeepSeek API Key</span>', unsafe_allow_html=True)
+    # ── LLM Provider + API key ────────────────────────────────────────────────
+    st.markdown('<span class="section-label">LLM Provider</span>', unsafe_allow_html=True)
+    _provider_options = ["deepseek", "openai", "claude"]
+    selected_provider = st.selectbox(
+        "LLM Provider",
+        options=_provider_options,
+        format_func=lambda p: PROVIDER_LABELS[p],
+        index=_provider_options.index(st.session_state.llm_provider),
+        label_visibility="collapsed",
+    )
+    st.session_state.llm_provider = selected_provider
+
+    st.markdown('<span class="section-label">' + PROVIDER_LABELS[selected_provider] + ' API Key</span>', unsafe_allow_html=True)
+    _key_field = f"api_key_{selected_provider}"
     ak = st.text_input(
-        "DeepSeek API Key", type="password",
-        value=st.session_state.api_key,
-        placeholder="sk-…", label_visibility="collapsed",
+        f"{PROVIDER_LABELS[selected_provider]} API Key", type="password",
+        value=st.session_state[_key_field],
+        placeholder=PROVIDER_KEY_PLACEHOLDER[selected_provider], label_visibility="collapsed",
     )
     if ak:
-        st.session_state.api_key = ak
+        st.session_state[_key_field] = ak
 
     st.markdown("---")
 
@@ -1159,7 +1220,7 @@ with st.sidebar:
     # ── LLM System Prompt ─────────────────────────────────────────────────────
     st.markdown('<span class="section-label">LLM System Prompt</span>', unsafe_allow_html=True)
     st.markdown(
-        '<p class="key-hint">Full system prompt sent to DeepSeek before every call.<br>'
+        '<p class="key-hint">Full system prompt sent to the selected LLM before every call.<br>'
         'Set your disease focus, expert role, context , and any instructions here.</p>',
         unsafe_allow_html=True,
     )
@@ -1302,17 +1363,19 @@ if not st.session_state.results:
     if community_text:
         parsed = parse_communities(community_text)
 
+    active_api_key = st.session_state[f"api_key_{st.session_state.llm_provider}"]
+
     c1, c2, _ = st.columns([1.2, 1.5, 3])
     run_btn = c1.button(
         "  Run Analysis", type="primary",
-        disabled=not (community_text and st.session_state.api_key),
+        disabled=not (community_text and active_api_key),
         use_container_width=True,
     )
     if parsed:
         c2.info(f"**{len(parsed)}** gene set(s) · **{sum(len(v) for v in parsed.values())}** genes total")
 
-    if not st.session_state.api_key:
-        st.warning("Enter your DeepSeek API key in the sidebar to proceed.")
+    if not active_api_key:
+        st.warning(f"Enter your {PROVIDER_LABELS[st.session_state.llm_provider]} API key in the sidebar to proceed.")
     if not st.session_state.ncbi_email or not st.session_state.ncbi_key:
         st.info(
             "ℹ️ NCBI email and API key are not set. PubMed queries will still work but may be "
@@ -1323,7 +1386,8 @@ if not st.session_state.results:
         st.session_state.step = 1
         results = run_pipeline(
             parsed,
-            st.session_state.api_key,
+            st.session_state.llm_provider,
+            active_api_key,
             st.session_state.pubmed_terms,
             st.session_state.ncbi_email,
             st.session_state.ncbi_key,

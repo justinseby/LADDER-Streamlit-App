@@ -13,7 +13,7 @@ LADDER is an LLM-powered gene set dual-annotation pipeline that names the biolog
 </p>
 
 <p align="center">
-  <img src="Fig/LADDERWebsiteImage.png" alt="LADDER Website screenshot" width="550">
+  <img src="Fig/Ladder Website Image V1.png" alt="LADDER Website screenshot" width="550">
 </p>
 
 ---
